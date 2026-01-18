@@ -9,6 +9,8 @@ public class MovimientoPorBloques25D : MonoBehaviour
     private float xObjetivo;
     private bool moviendo = false;
 
+    public bool puedeMoverse = true;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -17,18 +19,17 @@ public class MovimientoPorBloques25D : MonoBehaviour
 
     void Update()
     {
-        if (!moviendo)
+        if (!puedeMoverse || moviendo) return;
+
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                xObjetivo -= tamañoBloque;
-                moviendo = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                xObjetivo += tamañoBloque;
-                moviendo = true;
-            }
+            xObjetivo -= tamañoBloque;
+            moviendo = true;
+        }
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            xObjetivo += tamañoBloque;
+            moviendo = true;
         }
     }
 
@@ -51,6 +52,13 @@ public class MovimientoPorBloques25D : MonoBehaviour
         }
     }
 
-    
+    // 🔹 MÉTODO CLAVE PARA LA ESCALERA
+    public void Teletransportar(Vector3 destino)
+    {
+        moviendo = false;
+        rb.velocity = Vector3.zero;
+        rb.position = destino;
+        xObjetivo = destino.x;
+    }
 
 }

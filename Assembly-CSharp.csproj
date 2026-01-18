@@ -58,8 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
-    <Compile Include="Assets\Scripts\EscalerasSnap.cs" />
-    <Compile Include="Assets\Scripts\EscaleraFade.cs" />
+    <Compile Include="Assets\Scripts\stair.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
