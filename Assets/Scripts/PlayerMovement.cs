@@ -5,28 +5,43 @@ public class MovimientoPorBloques25D : MonoBehaviour
     public float tamañoBloque = 1f;
     public float velocidad = 10f;
 
+    public float distanciaSuelo = 0.2f;
+    public LayerMask capaSuelo;
+
     private Rigidbody rb;
     private float xObjetivo;
     private bool moviendo = false;
-
-    public bool puedeMoverse = true;
+    private bool estaEnSuelo;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         xObjetivo = rb.position.x;
+
+        // Congelamos Y al empezar
+        CongelarY();
     }
 
     void Update()
     {
-        if (!puedeMoverse || moviendo) return;
+        ComprobarSuelo();
 
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        // 🔁 Cambiamos constraints según estado
+        if (estaEnSuelo)
+            CongelarY();
+        else
+            LiberarY();
+
+        // ❌ No moverse si está en el aire
+        if (!estaEnSuelo || moviendo)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.A))
         {
             xObjetivo -= tamañoBloque;
             moviendo = true;
         }
-        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.D))
         {
             xObjetivo += tamañoBloque;
             moviendo = true;
@@ -52,13 +67,40 @@ public class MovimientoPorBloques25D : MonoBehaviour
         }
     }
 
-    // 🔹 MÉTODO CLAVE PARA LA ESCALERA
+    void ComprobarSuelo()
+    {
+        estaEnSuelo = Physics.Raycast(
+            transform.position,
+            Vector3.down,
+            distanciaSuelo,
+            capaSuelo
+        );
+    }
+
+    // 🔒 Congela Y
+    void CongelarY()
+    {
+        rb.constraints =
+            RigidbodyConstraints.FreezePositionY |
+            RigidbodyConstraints.FreezeRotationX |
+            RigidbodyConstraints.FreezeRotationZ;
+    }
+
+    // 🔓 Libera Y (para caer)
+    void LiberarY()
+    {
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotationX |
+            RigidbodyConstraints.FreezeRotationZ;
+    }
+
+    // 🔁 Teletransporte
     public void Teletransportar(Vector3 destino)
     {
+        LiberarY(); // permite ajustar Y
         moviendo = false;
         rb.velocity = Vector3.zero;
         rb.position = destino;
         xObjetivo = destino.x;
     }
-
 }

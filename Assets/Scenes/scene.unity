@@ -272,7 +272,7 @@ GameObject:
   - component: {fileID: 157641021}
   - component: {fileID: 157641020}
   - component: {fileID: 157641019}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,7 +377,7 @@ GameObject:
   - component: {fileID: 295665096}
   - component: {fileID: 295665095}
   - component: {fileID: 295665094}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -605,7 +605,7 @@ GameObject:
   - component: {fileID: 559571550}
   - component: {fileID: 559571549}
   - component: {fileID: 559571548}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -741,7 +741,7 @@ GameObject:
   - component: {fileID: 1416958864}
   - component: {fileID: 1416958863}
   - component: {fileID: 1416958862}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -986,7 +986,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   "tama\xF1oBloque": 1
   velocidad: 10
-  puedeMoverse: 1
+  distanciaSuelo: 0.75
+  capaSuelo:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!54 &1876001601
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1026,7 +1029,7 @@ GameObject:
   - component: {fileID: 1906181732}
   - component: {fileID: 1906181731}
   - component: {fileID: 1906181730}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1131,7 +1134,7 @@ GameObject:
   - component: {fileID: 1987807428}
   - component: {fileID: 1987807427}
   - component: {fileID: 1987807426}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1236,7 +1239,7 @@ GameObject:
   - component: {fileID: 2025300752}
   - component: {fileID: 2025300751}
   - component: {fileID: 2025300750}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ground_1 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
