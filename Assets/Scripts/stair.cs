@@ -12,8 +12,6 @@ public class Stair : MonoBehaviour
     private Material mat;
     private MovimientoPorBloques25D player;
 
-    private float epsilon = 0.05f; // margen pequeño para comparar posiciones
-
 
     void Start()
     {
@@ -25,19 +23,27 @@ public class Stair : MonoBehaviour
     {
         if (player == null) return;
 
-        if (Input.GetKeyDown(KeyCode.W) && player.transform.position.y < topPoint.position.y - epsilon)
-        {
-            // Solo subir si no está ya en TopPoint
-            player.Teletransportar(topPoint.position);
-        }
+        float distBottom = Mathf.Abs(player.transform.position.y - bottomPoint.position.y);
+        float distTop = Mathf.Abs(player.transform.position.y - topPoint.position.y);
 
-        if (Input.GetKeyDown(KeyCode.S) && player.transform.position.y > bottomPoint.position.y + epsilon)
+        // Estás más cerca de abajo → solo subir
+        if (distBottom < distTop)
         {
-            // Solo bajar si no está ya en BottomPoint
-            player.Teletransportar(bottomPoint.position);
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                player.Teletransportar(topPoint.position);
+            }
         }
-
+        // Estás más cerca de arriba → solo bajar
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                player.Teletransportar(bottomPoint.position);
+            }
+        }
     }
+
 
     void OnTriggerEnter(Collider other)
     {

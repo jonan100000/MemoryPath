@@ -14,6 +14,8 @@ public class MovimientoPorBloques25D : MonoBehaviour
     private bool estaEnSuelo;
 
     [HideInInspector] public bool enEscalera = false;
+    [HideInInspector] public bool enTeletransporte = false;
+
 
 
     void Start()
@@ -30,7 +32,7 @@ public class MovimientoPorBloques25D : MonoBehaviour
         ComprobarSuelo();
 
         // 🔁 Cambiamos constraints según estado
-        if (estaEnSuelo && !enEscalera)
+        if (estaEnSuelo && !enEscalera && !enTeletransporte)
             CongelarY();
         else
             LiberarY();
@@ -101,18 +103,13 @@ public class MovimientoPorBloques25D : MonoBehaviour
     // 🔁 Teletransporte
     public void Teletransportar(Vector3 destino)
     {
-        // 1️⃣ Liberar Y antes de teletransportar
-        LiberarY();
+        enTeletransporte = true;
 
-        // 2️⃣ Teletransportar
+        LiberarY();
         moviendo = false;
         rb.velocity = Vector3.zero;
         rb.position = destino;
         xObjetivo = destino.x;
-
-        // 3️⃣ Comprobar si está sobre suelo y volver a congelar
-        if (estaEnSuelo && !enEscalera)
-            CongelarY();
     }
 
 }
