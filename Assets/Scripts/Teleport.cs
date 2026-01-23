@@ -2,72 +2,78 @@ using UnityEngine;
 
 public class TeleportPortal : MonoBehaviour
 {
-    public Transform destino;      // el otro portal
-    public float transparentAlpha = 0.4f;
-    public GameObject objetoTransformacion; // Nuevo: objeto en el que se transformará
+    public Transform destino;
+
+    [Header("Prefabs visuales")]
+    public GameObject portalAbiertoPrefab;
+    public GameObject portalCerradoPrefab;
+
+    [HideInInspector] public bool activo = true;
+
+    private GameObject visualActual;
+
+    public ButtonPortalSwitch[] botonesAsociados; // Para notificar cambios
 
     private MeshRenderer mr;
-    private Material mat;
-    private MovimientoPorBloques25D player;
+    private Collider col;
 
     void Start()
     {
         mr = GetComponent<MeshRenderer>();
-        mat = mr.material;
+        col = GetComponent<Collider>();
+        InstanciarVisual(portalAbiertoPrefab);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        player = other.GetComponent<MovimientoPorBloques25D>();
+        if (!activo) return;
+
+        MovimientoPorBloques25D player = other.GetComponent<MovimientoPorBloques25D>();
         if (player == null) return;
 
-        // Opcional: hacer transparente mientras está en el portal
-        Color c = mat.color;
-        c.a = transparentAlpha;
-        mat.color = c;
-
-        // Teletransportar inmediatamente
         if (destino != null)
-        {
             player.Teletransportar(destino.position);
-            
-            // Transformar este portal
-            TransformarPortal(this.gameObject);
-            
-            // Transformar el portal destino
-            TransformarPortal(destino.gameObject);
-        }
+
+        DesactivarPortal();
+        if (destino.TryGetComponent<TeleportPortal>(out TeleportPortal otro))
+            otro.DesactivarPortal();
     }
 
-    void TransformarPortal(GameObject portal)
+    public void DesactivarPortal()
     {
-        // Evitar transformar múltiples veces si ya está transformado
-        TeleportPortal scriptPortal = portal.GetComponent<TeleportPortal>();
-        if (scriptPortal == null || portal.activeSelf == false) return;
+        activo = false;
+        CambiarVisual(portalCerradoPrefab);
 
-        // Si hay un objeto de transformación asignado
-        if (objetoTransformacion != null)
+        // Notificar a todos los botones que los portales están inactivos
+        foreach (var boton in botonesAsociados)
         {
-            // Crear el nuevo objeto en la misma posición y rotación
-            GameObject nuevoObjeto = Instantiate(
-                objetoTransformacion, 
-                portal.transform.position, 
-                portal.transform.rotation
-            );
+            if (boton != null)
+                boton.PonerDesactivado();
         }
-        
-        // Desactivar el portal original
-        portal.SetActive(false);
     }
 
-    void OnTriggerExit(Collider other)
+    public void ActivarPortal()
     {
-        if (other.GetComponent<MovimientoPorBloques25D>() == null) return;
+        activo = true;
+        CambiarVisual(portalAbiertoPrefab);
+    }
 
-        player = null;
+    private void CambiarVisual(GameObject prefab)
+    {
+        // Hacer invisible el objeto original
+        if (mr != null) mr.enabled = false;
+        if (col != null) col.enabled = false;
 
-        Color c = mat.color;
-        c.a = 1f;
-        mat.color = c;
+        // Destruye visual anterior
+        if (visualActual != null) Destroy(visualActual);
+
+        // Instancia nuevo prefab visual
+        if (prefab != null)
+            InstanciarVisual(prefab);
+    }
+
+    private void InstanciarVisual(GameObject prefab)
+    {
+        visualActual = Instantiate(prefab, transform.position, transform.rotation, transform);
     }
 }
