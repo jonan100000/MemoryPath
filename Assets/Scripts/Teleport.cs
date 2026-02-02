@@ -4,76 +4,78 @@ public class TeleportPortal : MonoBehaviour
 {
     public Transform destino;
 
-    [Header("Prefabs visuales")]
-    public GameObject portalAbiertoPrefab;
-    public GameObject portalCerradoPrefab;
+    [Header("Configuración de Prefabs")]
+    public GameObject prefabAbierto;
+    public GameObject prefabCerrado;
 
-    [HideInInspector] public bool activo = true;
+    public bool activo = true;
+    public ButtonPortalSwitch[] botonesAsociados;
 
-    private GameObject visualActual;
-
-    public ButtonPortalSwitch[] botonesAsociados; // Para notificar cambios
-
-    private MeshRenderer mr;
+    private GameObject instanciaAbierta;
+    private GameObject instanciaCerrada;
     private Collider col;
+
+    void Awake()
+    {
+        col = GetComponent<Collider>();
+
+        // Creamos las instancias una sola vez al inicio y las hacemos hijas
+        if (prefabAbierto != null)
+        {
+            instanciaAbierta = Instantiate(prefabAbierto, transform.position, transform.rotation, transform);
+        }
+
+        if (prefabCerrado != null)
+        {
+            instanciaCerrada = Instantiate(prefabCerrado, transform.position, transform.rotation, transform);
+            // Aplicamos la escala del prefab que vimos en tu foto (0.2, 1, 1) o la que traiga el prefab
+            instanciaCerrada.transform.localScale = prefabCerrado.transform.localScale;
+        }
+    }
 
     void Start()
     {
-        mr = GetComponent<MeshRenderer>();
-        col = GetComponent<Collider>();
-        InstanciarVisual(portalAbiertoPrefab);
+        ActualizarEstado();
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (!activo) return;
 
-        MovimientoPorBloques25D player = other.GetComponent<MovimientoPorBloques25D>();
-        if (player == null) return;
-
-        if (destino != null)
-            player.Teletransportar(destino.position);
-
-        DesactivarPortal();
-        if (destino.TryGetComponent<TeleportPortal>(out TeleportPortal otro))
-            otro.DesactivarPortal();
-    }
-
-    public void DesactivarPortal()
-    {
-        activo = false;
-        CambiarVisual(portalCerradoPrefab);
-
-        // Notificar a todos los botones que los portales están inactivos
-        foreach (var boton in botonesAsociados)
+        if (other.TryGetComponent<MovimientoPorBloques25D>(out var player))
         {
-            if (boton != null)
-                boton.PonerDesactivado();
+            if (destino != null)
+            {
+                player.Teletransportar(destino.position);
+                DesactivarPortal();
+
+                if (destino.TryGetComponent<TeleportPortal>(out var otro))
+                    otro.DesactivarPortal();
+            }
         }
     }
 
     public void ActivarPortal()
     {
         activo = true;
-        CambiarVisual(portalAbiertoPrefab);
+        ActualizarEstado();
     }
 
-    private void CambiarVisual(GameObject prefab)
+    public void DesactivarPortal()
     {
-        // Hacer invisible el objeto original
-        if (mr != null) mr.enabled = false;
-        if (col != null) col.enabled = false;
+        activo = false;
+        ActualizarEstado();
 
-        // Destruye visual anterior
-        if (visualActual != null) Destroy(visualActual);
-
-        // Instancia nuevo prefab visual
-        if (prefab != null)
-            InstanciarVisual(prefab);
+        foreach (var boton in botonesAsociados)
+            if (boton != null) boton.PonerDesactivado();
     }
 
-    private void InstanciarVisual(GameObject prefab)
+    private void ActualizarEstado()
     {
-        visualActual = Instantiate(prefab, transform.position, transform.rotation, transform);
+        if (col != null) col.enabled = activo;
+
+        // Simplemente encendemos/apagamos las instancias
+        if (instanciaAbierta != null) instanciaAbierta.SetActive(activo);
+        if (instanciaCerrada != null) instanciaCerrada.SetActive(!activo);
     }
 }
