@@ -3,79 +3,95 @@ using UnityEngine;
 public class TeleportPortal : MonoBehaviour
 {
     public Transform destino;
+    public bool activo = true;
 
-    [Header("Configuración de Prefabs")]
+    [Header("Visuales")]
     public GameObject prefabAbierto;
     public GameObject prefabCerrado;
 
-    public bool activo = true;
     public ButtonPortalSwitch[] botonesAsociados;
 
     private GameObject instanciaAbierta;
     private GameObject instanciaCerrada;
     private Collider col;
+    private bool ultimoEstadoActivo;
 
     void Awake()
     {
         col = GetComponent<Collider>();
+        // Asegúrate de que el collider sea siempre Trigger para teletransportar
+        if (col != null) col.isTrigger = true;
 
-        // Creamos las instancias una sola vez al inicio y las hacemos hijas
-        if (prefabAbierto != null)
-        {
+        if (prefabAbierto != null) 
             instanciaAbierta = Instantiate(prefabAbierto, transform.position, transform.rotation, transform);
-        }
-
+        
         if (prefabCerrado != null)
         {
             instanciaCerrada = Instantiate(prefabCerrado, transform.position, transform.rotation, transform);
-            // Aplicamos la escala del prefab que vimos en tu foto (0.2, 1, 1) o la que traiga el prefab
             instanciaCerrada.transform.localScale = prefabCerrado.transform.localScale;
         }
+        
+        ultimoEstadoActivo = activo;
     }
 
-    void Start()
+    void Start() => ActualizarVisual();
+
+    void Update()
     {
-        ActualizarEstado();
+        if (activo != ultimoEstadoActivo)
+        {
+            SincronizarConPareja(activo);
+        }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (!activo) return;
+        // Solo teletransporta si está activo
+        if (!activo || destino == null) return;
 
         if (other.TryGetComponent<MovimientoPorBloques25D>(out var player))
         {
-            if (destino != null)
-            {
-                player.Teletransportar(destino.position);
-                DesactivarPortal();
-
-                if (destino.TryGetComponent<TeleportPortal>(out var otro))
-                    otro.DesactivarPortal();
-            }
+            player.Teletransportar(destino.position);
+            SincronizarConPareja(false); // Se apagan ambos tras el uso
         }
     }
 
-    public void ActivarPortal()
+    public void SincronizarConPareja(bool nuevoEstado)
     {
-        activo = true;
-        ActualizarEstado();
+        activo = nuevoEstado;
+        ultimoEstadoActivo = nuevoEstado;
+        ActualizarVisual();
+
+        if (destino != null)
+        {
+            TeleportPortal otroPortal = destino.GetComponent<TeleportPortal>();
+            if (otroPortal != null && otroPortal.activo != nuevoEstado)
+            {
+                otroPortal.activo = nuevoEstado;
+                otroPortal.ActualizarVisual();
+                // Importante: que el otro también actualice sus botones
+                otroPortal.NotificarBotones();
+            }
+        }
+        NotificarBotones();
     }
 
-    public void DesactivarPortal()
+    public void ActualizarVisual()
     {
-        activo = false;
-        ActualizarEstado();
+        // OPCIONAL: Si el botón es el único que lo activa, 
+        // NO desactives el collider para evitar errores de físicas.
+        // if (col != null) col.enabled = activo; 
 
-        foreach (var boton in botonesAsociados)
-            if (boton != null) boton.PonerDesactivado();
-    }
-
-    private void ActualizarEstado()
-    {
-        if (col != null) col.enabled = activo;
-
-        // Simplemente encendemos/apagamos las instancias
         if (instanciaAbierta != null) instanciaAbierta.SetActive(activo);
         if (instanciaCerrada != null) instanciaCerrada.SetActive(!activo);
+    }
+
+    public void NotificarBotones()
+    {
+        if (botonesAsociados == null) return;
+        foreach (var b in botonesAsociados)
+        {
+            if (b != null) b.ActualizarVisual();
+        }
     }
 }

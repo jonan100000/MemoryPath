@@ -2,59 +2,47 @@ using UnityEngine;
 
 public class ButtonPortalSwitch : MonoBehaviour
 {
-    public TeleportPortal[] portales;
-    public GameObject prefabActivado;
-    public GameObject prefabDesactivado;
-    public float alturaOffset = 0f;
+    public TeleportPortal[] portales; // Para saber a quién mirar
 
-    private GameObject visualActual;
+    [Header("Referencias Visuales")]
+    public GameObject visualActivado;
+    public GameObject visualDesactivado;
 
-    void Start()
+    void Start() => ActualizarVisual();
+
+    // --- SOLO AÑADIMOS ESTO ---
+    private void OnTriggerEnter(Collider other)
     {
-        ActualizarVisual();
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.GetComponent<MovimientoPorBloques25D>() == null) return;
-
-        foreach (var portal in portales)
+        // Si el que pisa el botón es el jugador
+        if (other.TryGetComponent<MovimientoPorBloques25D>(out _))
         {
-            if (!portal.activo)
+            foreach (var p in portales)
             {
-                portal.ActivarPortal();
+                if (p != null && !p.activo) 
+                {
+                    // Solo activamos si están apagados
+                    p.SincronizarConPareja(true);
+                }
+            }
+        }
+    }
+    // --------------------------
+
+    public void ActualizarVisual()
+    {
+        bool todosActivos = true;
+
+        if (portales == null || portales.Length == 0) todosActivos = false;
+        else
+        {
+            foreach (var p in portales)
+            {
+                if (p == null || !p.activo) { todosActivos = false; break; }
             }
         }
 
-        ActualizarVisual();
-    }
-
-    public void PonerDesactivado()
-    {
-        ActualizarVisual();
-    }
-
-    private void ActualizarVisual()
-    {
-        GameObject prefab = TodosPortalesActivos() ? prefabActivado : prefabDesactivado;
-
-        if (visualActual != null)
-            Destroy(visualActual);
-
-        if (prefab != null)
-        {
-            Vector3 pos = transform.position;
-            pos.y += alturaOffset;
-            visualActual = Instantiate(prefab, pos, transform.rotation, transform);
-        }
-    }
-
-    private bool TodosPortalesActivos()
-    {
-        foreach (var portal in portales)
-        {
-            if (!portal.activo) return false;
-        }
-        return true;
+        // Intercambio directo de visibilidad
+        if (visualActivado != null) visualActivado.SetActive(todosActivos);
+        if (visualDesactivado != null) visualDesactivado.SetActive(!todosActivos);
     }
 }

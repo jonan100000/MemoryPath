@@ -12,9 +12,8 @@ GameObject:
   - component: {fileID: 8713001008021674593}
   - component: {fileID: 1887430808486483631}
   - component: {fileID: 6039693914353223188}
-  - component: {fileID: 1997888418251457368}
   m_Layer: 0
-  m_Name: ButtomBG
+  m_Name: ButtomDeactivateBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 162805800182720893}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.5, y: -0.8, z: 0}
-  m_LocalScale: {x: 0.75, y: 0.2, z: 1}
+  m_LocalPosition: {x: 2, y: -3.8, z: 0}
+  m_LocalScale: {x: 0.75, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -108,21 +107,3 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &1997888418251457368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 162805800182720893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a4fb37a3a8cc06498f6adc4312d0c3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  portales:
-  - {fileID: 0}
-  - {fileID: 0}
-  prefabActivado: {fileID: 7531664668928722080, guid: 911aba14dfc8ed24a935a53435bf359f, type: 3}
-  prefabDesactivado: {fileID: 464729172401948982, guid: b86b1fee961ca0448919c57a11defcb5, type: 3}
-  alturaOffset: -0.1
