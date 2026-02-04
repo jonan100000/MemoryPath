@@ -8,6 +8,7 @@ TagManager:
   - topPont
   - bottomPoint
   - meta
+  - Sombra
   layers:
   - Default
   - TransparentFX

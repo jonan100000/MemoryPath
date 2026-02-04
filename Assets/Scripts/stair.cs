@@ -10,8 +10,7 @@ public class Stair : MonoBehaviour
 
     private MeshRenderer mr;
     private Material mat;
-    private MovimientoPorBloques25D player;
-
+    private MovimientoPorBloques25D playerScript;
 
     void Start()
     {
@@ -21,53 +20,71 @@ public class Stair : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        // Solo el PLAYER real usa el Input para subir/bajar
+        if (playerScript == null) return;
 
-        float distBottom = Mathf.Abs(player.transform.position.y - bottomPoint.position.y);
-        float distTop = Mathf.Abs(player.transform.position.y - topPoint.position.y);
+        float distBottom = Mathf.Abs(playerScript.transform.position.y - bottomPoint.position.y);
+        float distTop = Mathf.Abs(playerScript.transform.position.y - topPoint.position.y);
 
-        // Estás más cerca de abajo → solo subir
         if (distBottom < distTop)
         {
             if (Input.GetKeyDown(KeyCode.W))
             {
-                player.Teletransportar(topPoint.position);
+                playerScript.Teletransportar(topPoint.position);
+                // Notificamos que esto ha sido un movimiento de turno
+                playerScript.RegistrarPasoDeEscalera();
             }
         }
-        // Estás más cerca de arriba → solo bajar
         else
         {
             if (Input.GetKeyDown(KeyCode.S))
             {
-                player.Teletransportar(bottomPoint.position);
+                playerScript.Teletransportar(bottomPoint.position);
+                // Notificamos que esto ha sido un movimiento de turno
+                playerScript.RegistrarPasoDeEscalera();
             }
         }
     }
 
-
     void OnTriggerEnter(Collider other)
     {
-        player = other.GetComponent<MovimientoPorBloques25D>();
-        if (player == null) return;
-
-        player.enEscalera = true; // ✅ marcar que está en escalera
-
-        Color c = mat.color;
-        c.a = transparentAlpha;
-        mat.color = c;
+        // Si entra el Jugador
+        if (other.CompareTag("Player"))
+        {
+            playerScript = other.GetComponent<MovimientoPorBloques25D>();
+            if (playerScript != null) playerScript.enEscalera = true;
+            SetTransparency(transparentAlpha);
+        }
+        
+        // Si entra la Sombra, también avisamos que está en escalera 
+        // para que sus constraints de Rigidbody cambien (LiberarY)
+        if (other.CompareTag("Sombra"))
+        {
+            var sombraMov = other.GetComponent<MovimientoPorBloques25D>(); // Si hereda del mismo script
+            if (sombraMov != null) sombraMov.enEscalera = true;
+        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other.GetComponent<MovimientoPorBloques25D>() == null) return;
+        if (other.CompareTag("Player"))
+        {
+            if (playerScript != null) playerScript.enEscalera = false;
+            playerScript = null;
+            SetTransparency(1f);
+        }
 
-        player.enEscalera = false; // ✅ sale de escalera
-        player = null;
-
-        Color c = mat.color;
-        c.a = 1f;
-        mat.color = c;
+        if (other.CompareTag("Sombra"))
+        {
+            var sombraMov = other.GetComponent<MovimientoPorBloques25D>();
+            if (sombraMov != null) sombraMov.enEscalera = false;
+        }
     }
 
+    void SetTransparency(float alpha)
+    {
+        Color c = mat.color;
+        c.a = alpha;
+        mat.color = c;
+    }
 }
-

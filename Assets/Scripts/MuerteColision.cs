@@ -1,18 +1,36 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MuerteColisíon : MonoBehaviour
+public class MuerteColision : MonoBehaviour
 {
+    // Para objetos SÃ“LIDOS (donde el jugador rebota o choca)
+    private void OnCollisionEnter(Collision collision)
+    {
+        ManejarMuerte(collision.gameObject);
+    }
+
+    // Para objetos FANTASMA (sensores, zonas de vacÃ­o con "Is Trigger")
     private void OnTriggerEnter(Collider other)
     {
-        // Comprobamos si lo que entró en el cubo es el Jugador
-        if (other.CompareTag("Player"))
-        {
-            // Reinicia la escena actual
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        ManejarMuerte(other.gameObject);
+    }
 
-            // Importante por si morimos después de haber ganado
+    // FunciÃ³n centralizada para no repetir cÃ³digo
+    private void ManejarMuerte(GameObject objetoQueToca)
+    {
+        if (objetoQueToca.CompareTag("Player"))
+        {
             Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        else if (objetoQueToca.CompareTag("Sombra"))
+        {
+            // Buscamos el script en la sombra y la matamos
+            SombraAcosadora scriptSombra = objetoQueToca.GetComponent<SombraAcosadora>();
+            if (scriptSombra != null)
+            {
+                scriptSombra.Morir();
+            }
         }
     }
 }

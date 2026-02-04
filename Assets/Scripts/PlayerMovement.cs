@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class MovimientoPorBloques25D : MonoBehaviour
 {
@@ -8,6 +9,11 @@ public class MovimientoPorBloques25D : MonoBehaviour
     public float distanciaSuelo = 0.2f;
     public LayerMask capaSuelo;
 
+    public SombraAcosadora scriptSombra;
+
+    public int movimientosRealizados = 0;
+    public List<Vector3> historialPosiciones = new List<Vector3>();
+
     private Rigidbody rb;
     private float xObjetivo;
     private bool moviendo = false;
@@ -16,14 +22,12 @@ public class MovimientoPorBloques25D : MonoBehaviour
     [HideInInspector] public bool enEscalera = false;
     [HideInInspector] public bool enTeletransporte = false;
 
-
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         xObjetivo = rb.position.x;
 
-        // Congelamos Y al empezar
+        historialPosiciones.Add(transform.position);
         CongelarY();
     }
 
@@ -31,14 +35,11 @@ public class MovimientoPorBloques25D : MonoBehaviour
     {
         ComprobarSuelo();
 
-        // 🔁 Cambiamos constraints según estado
         if (estaEnSuelo && !enEscalera && !enTeletransporte)
             CongelarY();
         else
             LiberarY();
 
-
-        // ❌ No moverse si está en el aire
         if (!estaEnSuelo || moviendo)
             return;
 
@@ -70,6 +71,15 @@ public class MovimientoPorBloques25D : MonoBehaviour
         {
             rb.MovePosition(new Vector3(xObjetivo, rb.position.y, rb.position.z));
             moviendo = false;
+
+            movimientosRealizados++;
+            historialPosiciones.Add(new Vector3(xObjetivo, rb.position.y, rb.position.z));
+
+            // 🔔 AVISO A LA SOMBRA CUANDO EL PASO TERMINA
+            if (scriptSombra != null && scriptSombra.EstaActiva())
+            {
+                scriptSombra.SincronizarPaso();
+            }
         }
     }
 
@@ -83,7 +93,6 @@ public class MovimientoPorBloques25D : MonoBehaviour
         );
     }
 
-    // 🔒 Congela Y
     void CongelarY()
     {
         rb.constraints =
@@ -92,7 +101,6 @@ public class MovimientoPorBloques25D : MonoBehaviour
             RigidbodyConstraints.FreezeRotationZ;
     }
 
-    // 🔓 Libera Y (para caer)
     void LiberarY()
     {
         rb.constraints =
@@ -100,7 +108,6 @@ public class MovimientoPorBloques25D : MonoBehaviour
             RigidbodyConstraints.FreezeRotationZ;
     }
 
-    // 🔁 Teletransporte
     public void Teletransportar(Vector3 destino)
     {
         enTeletransporte = true;
@@ -112,4 +119,19 @@ public class MovimientoPorBloques25D : MonoBehaviour
         xObjetivo = destino.x;
     }
 
+    public void RegistrarPasoDeEscalera()
+    {
+        // Solo si la sombra aún no ha nacido, aumentamos su "memoria" futura
+        if (!scriptSombra.EstaActiva()) {
+            // No hacemos nada, porque DespertarSombra se encargará de leer movimientosRealizados
+        }
+        
+        movimientosRealizados++;
+        historialPosiciones.Add(transform.position);
+
+        if (scriptSombra != null && scriptSombra.EstaActiva())
+        {
+            scriptSombra.SincronizarPaso();
+        }
+    }
 }

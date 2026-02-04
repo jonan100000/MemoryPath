@@ -12,23 +12,32 @@ public class ButtonBridgePulse : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<MovimientoPorBloques25D>(out _))
+        // Comprobamos si es el Jugador O la Sombra
+        if (EsEntidadValida(other))
         {
-            SetVisual(true); // El botón se ve presionado
+            SetVisual(true);
             
             if (puente != null)
             {
-                puente.AlternarPuente(); // Cambia el estado del puente (On/Off)
+                puente.AlternarPuente();
             }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<MovimientoPorBloques25D>(out _))
+        // Comprobamos si es el Jugador O la Sombra
+        if (EsEntidadValida(other))
         {
-            SetVisual(false); // El botón vuelve a su estado normal al quitar el pie
+            SetVisual(false);
         }
+    }
+
+    // Método de ayuda para detectar ambas entidades
+    private bool EsEntidadValida(Collider col)
+    {
+        return col.GetComponent<MovimientoPorBloques25D>() != null || 
+               col.GetComponent<SombraAcosadora>() != null;
     }
 
     private void SetVisual(bool presionado)
