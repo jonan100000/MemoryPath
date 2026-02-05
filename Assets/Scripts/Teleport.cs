@@ -46,13 +46,29 @@ public class TeleportPortal : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // Solo teletransporta si está activo
         if (!activo || destino == null) return;
 
-        if (other.TryGetComponent<MovimientoPorBloques25D>(out var player))
+        // 1. Intentamos obtener el script del Jugador
+        var player = other.GetComponent<MovimientoPorBloques25D>();
+        if (player != null)
         {
             player.Teletransportar(destino.position);
-            SincronizarConPareja(false); // Se apagan ambos tras el uso
+            SincronizarConPareja(false);
+            return; // Salimos para no ejecutar lo de abajo
+        }
+
+        // 2. Si no es el jugador, comprobamos si es la Sombra
+        var sombra = other.GetComponent<SombraAcosadora>();
+        if (sombra != null)
+        {
+            // Teletransporte físico puro para la sombra
+            other.transform.position = destino.position;
+            // Si el Rigidbody es cinemático o tiene constraints, 
+            // a veces es mejor usar rb.position:
+            Rigidbody rbSombra = other.GetComponent<Rigidbody>();
+            if (rbSombra != null) rbSombra.position = destino.position;
+
+            SincronizarConPareja(false);
         }
     }
 

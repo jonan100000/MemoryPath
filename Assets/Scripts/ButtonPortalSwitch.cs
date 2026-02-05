@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ButtonPortalSwitch : MonoBehaviour
 {
-    public TeleportPortal[] portales; // Para saber a quién mirar
+    public TeleportPortal[] portales;
 
     [Header("Referencias Visuales")]
     public GameObject visualActivado;
@@ -10,28 +10,24 @@ public class ButtonPortalSwitch : MonoBehaviour
 
     void Start() => ActualizarVisual();
 
-    // --- SOLO AÑADIMOS ESTO ---
     private void OnTriggerEnter(Collider other)
     {
-        // Si el que pisa el botón es el jugador
-        if (other.TryGetComponent<MovimientoPorBloques25D>(out _))
+        // Comprobamos si es el jugador O la sombra
+        if (other.CompareTag("Player") || other.CompareTag("Sombra"))
         {
             foreach (var p in portales)
             {
-                if (p != null && !p.activo) 
+                if (p != null && !p.activo)
                 {
-                    // Solo activamos si están apagados
                     p.SincronizarConPareja(true);
                 }
             }
         }
     }
-    // --------------------------
 
     public void ActualizarVisual()
     {
         bool todosActivos = true;
-
         if (portales == null || portales.Length == 0) todosActivos = false;
         else
         {
@@ -41,7 +37,6 @@ public class ButtonPortalSwitch : MonoBehaviour
             }
         }
 
-        // Intercambio directo de visibilidad
         if (visualActivado != null) visualActivado.SetActive(todosActivos);
         if (visualDesactivado != null) visualDesactivado.SetActive(!todosActivos);
     }

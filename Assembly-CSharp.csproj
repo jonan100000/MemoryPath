@@ -57,12 +57,14 @@
     <Analyzer Include="D:\Unity\Hub\Editor\2022.3.10f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\SombraAcosadora.cs" />
     <Compile Include="Assets\Scripts\ButtonBridgePulse.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\MuerteColision.cs" />
     <Compile Include="Assets\Scripts\stair.cs" />
     <Compile Include="Assets\Scripts\BridgeController.cs" />
     <Compile Include="Assets\Scripts\Teleport.cs" />
+    <Compile Include="Assets\Scripts\Menu.cs" />
     <Compile Include="Assets\Scripts\ButtonPortalSwitch.cs" />
     <Compile Include="Assets\Scripts\ControladorMeta.cs" />
   </ItemGroup>
