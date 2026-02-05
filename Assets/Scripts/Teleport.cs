@@ -59,14 +59,16 @@ public class TeleportPortal : MonoBehaviour
 
         // 2. Si no es el jugador, comprobamos si es la Sombra
         var sombra = other.GetComponent<SombraAcosadora>();
+        // Dentro de TeleportPortal.cs
         if (sombra != null)
         {
-            // Teletransporte físico puro para la sombra
+            // 1. Movimiento físico
             other.transform.position = destino.position;
-            // Si el Rigidbody es cinemático o tiene constraints, 
-            // a veces es mejor usar rb.position:
             Rigidbody rbSombra = other.GetComponent<Rigidbody>();
             if (rbSombra != null) rbSombra.position = destino.position;
+
+            // 2. IMPORTANTE: Consumir el turno actual
+            sombra.CompletarPasoPorTeleport();
 
             SincronizarConPareja(false);
         }

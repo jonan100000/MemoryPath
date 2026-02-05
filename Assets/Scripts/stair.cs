@@ -11,6 +11,7 @@ public class Stair : MonoBehaviour
     private MeshRenderer mr;
     private Material mat;
     private MovimientoPorBloques25D playerScript;
+    private SombraAcosadora sombraScript;
 
     void Start()
     {
@@ -46,22 +47,36 @@ public class Stair : MonoBehaviour
         }
     }
 
+    public void EjecutarTeletransporteSombra()
+    {
+        if (sombraScript == null) return;
+
+        // Detectamos si está más cerca de la base o de la cima
+        float distBottom = Vector3.Distance(sombraScript.transform.position, bottomPoint.position);
+        float distTop = Vector3.Distance(sombraScript.transform.position, topPoint.position);
+
+        // Si está abajo, la mandamos arriba. Si está arriba, abajo.
+        Vector3 destino = (distBottom < distTop) ? topPoint.position : bottomPoint.position;
+
+        // Teletransporte físico inmediato
+        sombraScript.transform.position = destino;
+        Rigidbody rbS = sombraScript.GetComponent<Rigidbody>();
+        if (rbS != null) rbS.position = destino;
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        // Si entra el Jugador
         if (other.CompareTag("Player"))
         {
             playerScript = other.GetComponent<MovimientoPorBloques25D>();
             if (playerScript != null) playerScript.enEscalera = true;
             SetTransparency(transparentAlpha);
         }
-        
-        // Si entra la Sombra, también avisamos que está en escalera 
-        // para que sus constraints de Rigidbody cambien (LiberarY)
+
+        // Guardamos la referencia de la sombra cuando entra
         if (other.CompareTag("Sombra"))
         {
-            var sombraMov = other.GetComponent<MovimientoPorBloques25D>(); // Si hereda del mismo script
-            if (sombraMov != null) sombraMov.enEscalera = true;
+            sombraScript = other.GetComponent<SombraAcosadora>();
         }
     }
 
@@ -76,8 +91,7 @@ public class Stair : MonoBehaviour
 
         if (other.CompareTag("Sombra"))
         {
-            var sombraMov = other.GetComponent<MovimientoPorBloques25D>();
-            if (sombraMov != null) sombraMov.enEscalera = false;
+            sombraScript = null;
         }
     }
 

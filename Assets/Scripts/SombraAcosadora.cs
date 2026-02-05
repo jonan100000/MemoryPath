@@ -10,6 +10,9 @@ public class SombraAcosadora : MonoBehaviour
     private bool activa = false;
     private bool muerta = false;
 
+    private float xObjetivoPropio;
+    private bool ejecutandoAccion = false;
+
     private int indicePasosSombra = 0;
     private int pasosPermitidos = 0;
     private int pasosMaximos = 0;
@@ -17,6 +20,8 @@ public class SombraAcosadora : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        // Estado inicial: invisible e intangible
         GetComponent<MeshRenderer>().enabled = false;
         GetComponent<Collider>().enabled = false;
         rb.isKinematic = true;
@@ -24,6 +29,7 @@ public class SombraAcosadora : MonoBehaviour
 
     public bool EstaActiva() => activa && !muerta;
 
+    // Se llama desde el Player para darle "tickets" de movimiento
     public void SincronizarPaso()
     {
         if (activa && !muerta)
@@ -34,6 +40,7 @@ public class SombraAcosadora : MonoBehaviour
 
     void Update()
     {
+        // Despertar cuando el jugador alcance el límite de movimientos inicial
         if (!activa && scriptJugador.movimientosRealizados >= movimientosParaActivar)
         {
             DespertarSombra();
@@ -42,41 +49,61 @@ public class SombraAcosadora : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!activa || muerta || pasosPermitidos <= 0 || indicePasosSombra >= pasosMaximos) 
+        if (!activa || muerta || pasosPermitidos <= 0 || indicePasosSombra >= pasosMaximos)
             return;
 
-        Vector3 objetivo = scriptJugador.historialPosiciones[indicePasosSombra];
+        // Leemos el comando grabado (Izquierda, Derecha o Escalera)
+        // Usamos el enum definido en el script del Player
+        MovimientoPorBloques25D.TipoMovimiento comando = scriptJugador.historialComandos[indicePasosSombra];
 
-        float distanciaX = Mathf.Abs(transform.position.x - objetivo.x);
-        float distanciaY = Mathf.Abs(transform.position.y - objetivo.y);
-
-        // CASO A: Escalera (Teletransporte vertical)
-        // Si hay mucha diferencia de altura y poca en X, saltamos directamente
-        if (distanciaY > 0.5f && distanciaX < 0.1f)
+        if (comando == MovimientoPorBloques25D.TipoMovimiento.Escalera)
         {
-            rb.position = objetivo;
-            FinalizarMovimiento(objetivo);
+            // Buscamos si estamos dentro de un trigger de escalera
+            // Podemos usar un OverlapSphere pequeño para encontrar el script de la escalera
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.5f);
+            foreach (var hit in hitColliders)
+            {
+                Stair escalera = hit.GetComponent<Stair>();
+                if (escalera != null)
+                {
+                    escalera.EjecutarTeletransporteSombra();
+                    break;
+                }
+            }
+
+            FinalizarTurno();
         }
-        // CASO B: Movimiento horizontal normal
         else
         {
-            float nuevaX = Mathf.MoveTowards(transform.position.x, objetivo.x, velocidadSombra * Time.fixedDeltaTime);
-            
-            // Movemos en X pero mantenemos la Y del objetivo por si hay pequeños desniveles
-            rb.MovePosition(new Vector3(nuevaX, objetivo.y, transform.position.z));
-
-            if (Mathf.Abs(nuevaX - objetivo.x) < 0.01f)
+            // Lógica de movimiento por bloques independiente
+            if (!ejecutandoAccion)
             {
-                FinalizarMovimiento(objetivo);
+                float direccion = (comando == MovimientoPorBloques25D.TipoMovimiento.Derecha) ? 1f : -1f;
+                xObjetivoPropio = rb.position.x + (direccion * scriptJugador.tamañoBloque);
+                ejecutandoAccion = true;
+            }
+
+            float nuevaX = Mathf.MoveTowards(rb.position.x, xObjetivoPropio, velocidadSombra * Time.fixedDeltaTime);
+
+            // Mantenemos su propia Y (gravedad) mientras se mueve en X
+            rb.MovePosition(new Vector3(nuevaX, rb.position.y, rb.position.z));
+
+            if (Mathf.Abs(nuevaX - xObjetivoPropio) < 0.01f)
+            {
+                rb.MovePosition(new Vector3(xObjetivoPropio, rb.position.y, rb.position.z));
+                ejecutandoAccion = false;
+                FinalizarTurno();
             }
         }
     }
 
-    private void FinalizarMovimiento(Vector3 posicionFinal)
+    void FinalizarTurno()
     {
-        rb.MovePosition(posicionFinal);
         indicePasosSombra++;
         pasosPermitidos--;
+        ejecutandoAccion = false; // <--- ESTO ES CLAVE
+                                  // Al ser falso, el próximo FixedUpdate recalculará xObjetivoPropio 
+                                  // basándose en la posición ACTUAL (la del portal).
     }
 
     void DespertarSombra()
@@ -86,6 +113,7 @@ public class SombraAcosadora : MonoBehaviour
         GetComponent<Collider>().enabled = true;
 
         rb.isKinematic = false;
+        // Congelamos rotaciones y eje Z para el 2.5D
         rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
 
         indicePasosSombra = 0;
@@ -93,10 +121,38 @@ public class SombraAcosadora : MonoBehaviour
         pasosPermitidos = 0;
     }
 
+    // Método restaurado para colisiones con trampas, etc.
     public void Morir()
     {
         muerta = true;
         rb.velocity = Vector3.zero;
         gameObject.SetActive(false);
+    }
+
+    public void ResetearMovimiento()
+    {
+        // Al poner esto en false, obligamos a la sombra a que en el próximo 
+        // FixedUpdate recalcule su 'xObjetivoPropio' desde su nueva posición X.
+        ejecutandoAccion = false;
+    }
+
+    public void CompletarPasoPorTeleport()
+    {
+        ejecutandoAccion = false;
+        // Consumimos el "ticket" del movimiento que nos metió al portal
+        // para que no intente repetirlo al salir.
+        indicePasosSombra++;
+        pasosPermitidos--;
+    }
+
+    // Método de utilidad para el Player si necesita bloquear inputs
+    public bool TienePasosPendientes() => pasosPermitidos > 0;
+
+    // Dentro de SombraAcosadora.cs
+    public bool EstaOcupada()
+    {
+        // Está ocupada si: está ejecutando un paso lateral O si su velocidad vertical es significativa (cayendo)
+        bool cayendo = Mathf.Abs(rb.velocity.y) > 0.1f;
+        return ejecutandoAccion || cayendo || TienePasosPendientes();
     }
 }
