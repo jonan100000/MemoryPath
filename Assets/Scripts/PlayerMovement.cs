@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class MovimientoPorBloques25D : MonoBehaviour
 {
@@ -9,16 +9,13 @@ public class MovimientoPorBloques25D : MonoBehaviour
     public float velocidad = 10f;
     public float distanciaSuelo = 0.2f;
     public LayerMask capaSuelo;
-
     public SombraAcosadora scriptSombra;
-
     public int movimientosRealizados = 0;
-    // Esta es la ÚNICA lista que necesitamos ahora
     public List<TipoMovimiento> historialComandos = new List<TipoMovimiento>();
 
     private Rigidbody rb;
     private float xObjetivo;
-    private bool moviendo = false;
+    private bool moviendo;
     private bool estaEnSuelo;
 
     [HideInInspector] public bool enEscalera = false;
@@ -34,39 +31,22 @@ public class MovimientoPorBloques25D : MonoBehaviour
     void Update()
     {
         ComprobarSuelo();
+        ActualizarRestriccionesY();
 
-        // Manejo de físicas (Y)
-        if (estaEnSuelo && !enEscalera && !enTeletransporte)
-            CongelarY();
-        else
-            LiberarY();
-
-        // LA ADUANA UNIFICADA
-        // Definimos si la sombra está haciendo algo
-        bool sombraOcupada = (scriptSombra != null && scriptSombra.EstaActiva() && scriptSombra.EstaOcupada());
-
-        // Si el player se mueve, o está en el aire, o la sombra está trabajando: bloqueamos input.
-        if (!estaEnSuelo || moviendo || sombraOcupada)
+        if (BloquearInput())
+        {
             return;
+        }
 
-        // LECTURA DE INPUTS
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            xObjetivo -= tamañoBloque;
-            moviendo = true;
-            historialComandos.Add(TipoMovimiento.Izquierda);
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            xObjetivo += tamañoBloque;
-            moviendo = true;
-            historialComandos.Add(TipoMovimiento.Derecha);
-        }
+        LeerInputMovimiento();
     }
 
     void FixedUpdate()
     {
-        if (!moviendo) return;
+        if (!moviendo)
+        {
+            return;
+        }
 
         float nuevaX = Mathf.MoveTowards(rb.position.x, xObjetivo, velocidad * Time.fixedDeltaTime);
         rb.MovePosition(new Vector3(nuevaX, rb.position.y, rb.position.z));
@@ -78,13 +58,52 @@ public class MovimientoPorBloques25D : MonoBehaviour
             movimientosRealizados++;
 
             if (scriptSombra != null)
+            {
                 scriptSombra.SincronizarPaso();
+            }
         }
     }
 
     void ComprobarSuelo()
     {
         estaEnSuelo = Physics.Raycast(transform.position, Vector3.down, distanciaSuelo, capaSuelo);
+    }
+
+    void ActualizarRestriccionesY()
+    {
+        if (estaEnSuelo && !enEscalera && !enTeletransporte)
+        {
+            CongelarY();
+        }
+        else
+        {
+            LiberarY();
+        }
+    }
+
+    bool BloquearInput()
+    {
+        bool sombraOcupada = scriptSombra != null && scriptSombra.EstaActiva() && scriptSombra.EstaOcupada();
+        return !estaEnSuelo || moviendo || sombraOcupada;
+    }
+
+    void LeerInputMovimiento()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            RegistrarMovimientoLateral(-tamañoBloque, TipoMovimiento.Izquierda);
+        }
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            RegistrarMovimientoLateral(tamañoBloque, TipoMovimiento.Derecha);
+        }
+    }
+
+    void RegistrarMovimientoLateral(float deltaX, TipoMovimiento movimiento)
+    {
+        xObjetivo += deltaX;
+        moviendo = true;
+        historialComandos.Add(movimiento);
     }
 
     void CongelarY()
@@ -111,6 +130,9 @@ public class MovimientoPorBloques25D : MonoBehaviour
     {
         movimientosRealizados++;
         historialComandos.Add(TipoMovimiento.Escalera);
-        if (scriptSombra != null) scriptSombra.SincronizarPaso();
+        if (scriptSombra != null)
+        {
+            scriptSombra.SincronizarPaso();
+        }
     }
 }

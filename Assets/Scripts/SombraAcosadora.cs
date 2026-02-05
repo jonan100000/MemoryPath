@@ -7,6 +7,8 @@ public class SombraAcosadora : MonoBehaviour
     public float velocidadSombra = 5f;
 
     private Rigidbody rb;
+    private MeshRenderer meshRenderer;
+    private Collider shadowCollider;
     private bool activa = false;
     private bool muerta = false;
 
@@ -20,10 +22,12 @@ public class SombraAcosadora : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        shadowCollider = GetComponent<Collider>();
 
         // Estado inicial: invisible e intangible
-        GetComponent<MeshRenderer>().enabled = false;
-        GetComponent<Collider>().enabled = false;
+        if (meshRenderer != null) meshRenderer.enabled = false;
+        if (shadowCollider != null) shadowCollider.enabled = false;
         rb.isKinematic = true;
     }
 
@@ -49,7 +53,7 @@ public class SombraAcosadora : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!activa || muerta || pasosPermitidos <= 0 || indicePasosSombra >= pasosMaximos)
+        if (!PuedeProcesarPaso())
             return;
 
         // Leemos el comando grabado (Izquierda, Derecha o Escalera)
@@ -97,20 +101,23 @@ public class SombraAcosadora : MonoBehaviour
         }
     }
 
+    bool PuedeProcesarPaso()
+    {
+        return activa && !muerta && pasosPermitidos > 0 && indicePasosSombra < pasosMaximos;
+    }
+
     void FinalizarTurno()
     {
         indicePasosSombra++;
         pasosPermitidos--;
-        ejecutandoAccion = false; // <--- ESTO ES CLAVE
-                                  // Al ser falso, el próximo FixedUpdate recalculará xObjetivoPropio 
-                                  // basándose en la posición ACTUAL (la del portal).
+        ejecutandoAccion = false;
     }
 
     void DespertarSombra()
     {
         activa = true;
-        GetComponent<MeshRenderer>().enabled = true;
-        GetComponent<Collider>().enabled = true;
+        if (meshRenderer != null) meshRenderer.enabled = true;
+        if (shadowCollider != null) shadowCollider.enabled = true;
 
         rb.isKinematic = false;
         // Congelamos rotaciones y eje Z para el 2.5D

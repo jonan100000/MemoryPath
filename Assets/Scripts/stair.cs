@@ -13,10 +13,13 @@ public class Stair : MonoBehaviour
     private MovimientoPorBloques25D playerScript;
     private SombraAcosadora sombraScript;
 
-    void Start()
+    void Awake()
     {
         mr = GetComponent<MeshRenderer>();
-        mat = mr.material;
+        if (mr != null)
+        {
+            mat = mr.material;
+        }
     }
 
     void Update()
@@ -27,24 +30,20 @@ public class Stair : MonoBehaviour
         float distBottom = Mathf.Abs(playerScript.transform.position.y - bottomPoint.position.y);
         float distTop = Mathf.Abs(playerScript.transform.position.y - topPoint.position.y);
 
-        if (distBottom < distTop)
+        if (distBottom < distTop && Input.GetKeyDown(KeyCode.W))
         {
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                playerScript.Teletransportar(topPoint.position);
-                // Notificamos que esto ha sido un movimiento de turno
-                playerScript.RegistrarPasoDeEscalera();
-            }
+            EjecutarMovimientoJugador(topPoint.position);
         }
-        else
+        else if (distBottom >= distTop && Input.GetKeyDown(KeyCode.S))
         {
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                playerScript.Teletransportar(bottomPoint.position);
-                // Notificamos que esto ha sido un movimiento de turno
-                playerScript.RegistrarPasoDeEscalera();
-            }
+            EjecutarMovimientoJugador(bottomPoint.position);
         }
+    }
+
+    void EjecutarMovimientoJugador(Vector3 destino)
+    {
+        playerScript.Teletransportar(destino);
+        playerScript.RegistrarPasoDeEscalera();
     }
 
     public void EjecutarTeletransporteSombra()
@@ -97,6 +96,8 @@ public class Stair : MonoBehaviour
 
     void SetTransparency(float alpha)
     {
+        if (mat == null) return;
+
         Color c = mat.color;
         c.a = alpha;
         mat.color = c;
