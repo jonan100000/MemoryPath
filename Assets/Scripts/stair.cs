@@ -2,99 +2,105 @@ using UnityEngine;
 
 public class Stair : MonoBehaviour
 {
-    public Transform topPoint;
-    public Transform bottomPoint;
+    public Transform topPoint;    // Punto superior de la escalera
+    public Transform bottomPoint; // Punto inferior de la escalera
 
     [Range(0f, 1f)]
-    public float transparentAlpha = 0.4f;
+    public float transparentAlpha = 0.4f; // Transparencia que se aplica al jugador cuando está en la escalera
 
-    private MeshRenderer mr;
-    private Material mat;
-    private MovimientoPorBloques25D playerScript;
-    private SombraAcosadora sombraScript;
+    private MeshRenderer mr;           // MeshRenderer del objeto escalera
+    private Material mat;              // Material para cambiar transparencia
+    private MovimientoPorBloques25D playerScript; // Referencia al script del jugador cuando entra en la escalera
+    private SombraAcosadora sombraScript;         // Referencia al script de la sombra cuando entra en la escalera
 
     void Start()
     {
-        mr = GetComponent<MeshRenderer>();
-        mat = mr.material;
+        mr = GetComponent<MeshRenderer>(); // Obtenemos el MeshRenderer
+        mat = mr.material;                 // Guardamos el material para manipular transparencia
     }
 
     void Update()
     {
-        // Solo el PLAYER real usa el Input para subir/bajar
+        // Solo el PLAYER usa input directo para subir/bajar
         if (playerScript == null) return;
 
+        // Calculamos distancia desde la base y desde la cima
         float distBottom = Mathf.Abs(playerScript.transform.position.y - bottomPoint.position.y);
         float distTop = Mathf.Abs(playerScript.transform.position.y - topPoint.position.y);
 
+        // Si el jugador está más cerca de la base, puede subir
         if (distBottom < distTop)
         {
             if (Input.GetKeyDown(KeyCode.W))
             {
+                // Teletransportamos al jugador a la cima
                 playerScript.Teletransportar(topPoint.position);
-                // Notificamos que esto ha sido un movimiento de turno
-                playerScript.RegistrarPasoDeEscalera();
+                // Registramos este movimiento como un "paso de escalera"
+                playerScript.RegistrarPasoDeEscalera(); 
             }
         }
-        else
+        else // Si está más cerca de la cima, puede bajar
         {
             if (Input.GetKeyDown(KeyCode.S))
             {
                 playerScript.Teletransportar(bottomPoint.position);
-                // Notificamos que esto ha sido un movimiento de turno
                 playerScript.RegistrarPasoDeEscalera();
             }
         }
     }
 
+    // Método llamado por la sombra para teletransportarse por la escalera
     public void EjecutarTeletransporteSombra()
     {
-        if (sombraScript == null) return;
+        if (sombraScript == null) return; // Si no hay sombra, salimos
 
-        // Detectamos si está más cerca de la base o de la cima
+        // Calculamos distancia desde la base y desde la cima
         float distBottom = Vector3.Distance(sombraScript.transform.position, bottomPoint.position);
         float distTop = Vector3.Distance(sombraScript.transform.position, topPoint.position);
 
-        // Si está abajo, la mandamos arriba. Si está arriba, abajo.
+        // Elegimos destino: si está abajo, sube; si está arriba, baja
         Vector3 destino = (distBottom < distTop) ? topPoint.position : bottomPoint.position;
 
-        // Teletransporte físico inmediato
+        // Teletransportamos físicamente a la sombra
         sombraScript.transform.position = destino;
         Rigidbody rbS = sombraScript.GetComponent<Rigidbody>();
-        if (rbS != null) rbS.position = destino;
+        if (rbS != null) rbS.position = destino; // Aseguramos que el Rigidbody también se actualice
     }
 
+    // Detecta cuando algo entra en el trigger de la escalera
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             playerScript = other.GetComponent<MovimientoPorBloques25D>();
-            if (playerScript != null) playerScript.enEscalera = true;
-            SetTransparency(transparentAlpha);
+            if (playerScript != null) playerScript.enEscalera = true; // Flag que indica que está en escalera
+            SetTransparency(transparentAlpha); // Hacemos la escalera transparente para el jugador
         }
 
-        // Guardamos la referencia de la sombra cuando entra
+        // Guardamos referencia a la sombra si entra
         if (other.CompareTag("Sombra"))
         {
             sombraScript = other.GetComponent<SombraAcosadora>();
         }
     }
 
+    // Detecta cuando algo sale del trigger de la escalera
     void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            if (playerScript != null) playerScript.enEscalera = false;
+            if (playerScript != null) playerScript.enEscalera = false; // Reset flag escalera
             playerScript = null;
-            SetTransparency(1f);
+            SetTransparency(1f); // Restauramos transparencia completa
         }
 
         if (other.CompareTag("Sombra"))
         {
-            sombraScript = null;
+            sombraScript = null; // Quitamos referencia a la sombra
         }
     }
 
+    // Cambia la transparencia del material de la escalera
     void SetTransparency(float alpha)
     {
         Color c = mat.color;

@@ -3,17 +3,19 @@ using UnityEngine.SceneManagement;
 
 public sealed class ControladorMeta : MonoBehaviour
 {
-    public GameObject panelVictoria;
+    public GameObject panelVictoria; // Panel que se activa cuando el jugador alcanza la meta
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
+            // Mostrar el panel de victoria
             panelVictoria.SetActive(true);
 
             // CONGELAR EL JUEGO
             Time.timeScale = 0f;
 
+            // Liberar el cursor para poder interactuar con la UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -28,7 +30,9 @@ public sealed class ControladorMeta : MonoBehaviour
 
     public void SiguienteNivel()
     {
+        // Despausar el juego
         Time.timeScale = 1f;
+
         int escenaActual = SceneManager.GetActiveScene().buildIndex;
 
         // Si la siguiente escena existe en la lista de Build Settings...
@@ -38,7 +42,7 @@ public sealed class ControladorMeta : MonoBehaviour
         }
         else
         {
-            // Si es el último nivel, vuelve al menú
+            // Si es el Ãºltimo nivel, vuelve al menÃº principal
             SceneManager.LoadScene("MenuPrincipal");
         }
     }

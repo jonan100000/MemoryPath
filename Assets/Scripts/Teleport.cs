@@ -2,26 +2,27 @@ using UnityEngine;
 
 public class TeleportPortal : MonoBehaviour
 {
-    public Transform destino;
-    public bool activo = true;
+    public Transform destino;    // Punto al que se teletransportará el jugador o la sombra
+    public bool activo = true;   // Estado del portal: abierto o cerrado
 
     [Header("Visuales")]
-    public GameObject prefabAbierto;
-    public GameObject prefabCerrado;
+    public GameObject prefabAbierto; // Prefab para mostrar portal abierto
+    public GameObject prefabCerrado; // Prefab para mostrar portal cerrado
 
-    public ButtonPortalSwitch[] botonesAsociados;
+    public ButtonPortalSwitch[] botonesAsociados; // Botones que pueden activar/desactivar este portal
 
-    private GameObject instanciaAbierta;
-    private GameObject instanciaCerrada;
-    private Collider col;
-    private bool ultimoEstadoActivo;
+    private GameObject instanciaAbierta;  // Instancia en escena del portal abierto
+    private GameObject instanciaCerrada;  // Instancia en escena del portal cerrado
+    private Collider col;                 // Collider del portal
+    private bool ultimoEstadoActivo;      // Guardamos último estado para detectar cambios
 
     void Awake()
     {
         col = GetComponent<Collider>();
-        // Asegúrate de que el collider sea siempre Trigger para teletransportar
+        // Aseguramos que el collider sea trigger para teletransportar
         if (col != null) col.isTrigger = true;
 
+        // Instanciamos prefabs visuales
         if (prefabAbierto != null) 
             instanciaAbierta = Instantiate(prefabAbierto, transform.position, transform.rotation, transform);
         
@@ -30,50 +31,52 @@ public class TeleportPortal : MonoBehaviour
             instanciaCerrada = Instantiate(prefabCerrado, transform.position, transform.rotation, transform);
             instanciaCerrada.transform.localScale = prefabCerrado.transform.localScale;
         }
-        
+
+        // Guardamos el estado inicial
         ultimoEstadoActivo = activo;
     }
 
-    void Start() => ActualizarVisual();
+    void Start() => ActualizarVisual(); // Inicializamos visual según el estado
 
     void Update()
     {
+        // Detectamos cambios en el estado del portal
         if (activo != ultimoEstadoActivo)
         {
-            SincronizarConPareja(activo);
+            SincronizarConPareja(activo); // Actualizamos estado del portal y su “pareja” en destino
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (!activo || destino == null) return;
+        if (!activo || destino == null) return; // Si el portal está cerrado o no tiene destino, no hacemos nada
 
         // 1. Intentamos obtener el script del Jugador
         var player = other.GetComponent<MovimientoPorBloques25D>();
         if (player != null)
         {
-            player.Teletransportar(destino.position);
-            SincronizarConPareja(false);
-            return; // Salimos para no ejecutar lo de abajo
+            player.Teletransportar(destino.position); // Teletransportamos al jugador usando su método
+            SincronizarConPareja(false);             // Cerramos el portal después de usarlo
+            return; // Salimos para no ejecutar el resto
         }
 
         // 2. Si no es el jugador, comprobamos si es la Sombra
         var sombra = other.GetComponent<SombraAcosadora>();
-        // Dentro de TeleportPortal.cs
         if (sombra != null)
         {
-            // 1. Movimiento físico
+            // Movimiento físico inmediato de la sombra
             other.transform.position = destino.position;
             Rigidbody rbSombra = other.GetComponent<Rigidbody>();
             if (rbSombra != null) rbSombra.position = destino.position;
 
-            // 2. IMPORTANTE: Consumir el turno actual
+            // Consumimos el “turno” actual de la sombra para que no repita el movimiento
             sombra.CompletarPasoPorTeleport();
 
-            SincronizarConPareja(false);
+            SincronizarConPareja(false); // Cerramos portal después de usarlo
         }
     }
 
+    // Sincroniza este portal con su “pareja” en el destino
     public void SincronizarConPareja(bool nuevoEstado)
     {
         activo = nuevoEstado;
@@ -82,28 +85,29 @@ public class TeleportPortal : MonoBehaviour
 
         if (destino != null)
         {
+            // Intentamos obtener el portal en el destino para sincronizarlo
             TeleportPortal otroPortal = destino.GetComponent<TeleportPortal>();
             if (otroPortal != null && otroPortal.activo != nuevoEstado)
             {
                 otroPortal.activo = nuevoEstado;
                 otroPortal.ActualizarVisual();
-                // Importante: que el otro también actualice sus botones
+                // Actualizamos los botones asociados del otro portal
                 otroPortal.NotificarBotones();
             }
         }
+        // Actualizamos botones locales
         NotificarBotones();
     }
 
+    // Cambia la visual del portal según esté abierto o cerrado
     public void ActualizarVisual()
     {
-        // OPCIONAL: Si el botón es el único que lo activa, 
-        // NO desactives el collider para evitar errores de físicas.
-        // if (col != null) col.enabled = activo; 
-
+        // Nota: No desactivamos el collider por seguridad de físicas
         if (instanciaAbierta != null) instanciaAbierta.SetActive(activo);
         if (instanciaCerrada != null) instanciaCerrada.SetActive(!activo);
     }
 
+    // Notifica a todos los botones asociados para que actualicen su apariencia
     public void NotificarBotones()
     {
         if (botonesAsociados == null) return;

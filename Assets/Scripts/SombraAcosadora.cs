@@ -2,20 +2,20 @@ using UnityEngine;
 
 public class SombraAcosadora : MonoBehaviour
 {
-    public MovimientoPorBloques25D scriptJugador;
-    public int movimientosParaActivar = 5;
-    public float velocidadSombra = 5f;
+    public MovimientoPorBloques25D scriptJugador; // Referencia al script del jugador para leer movimientos
+    public int movimientosParaActivar = 5;       // Número de pasos que el jugador debe realizar para despertar a la sombra
+    public float velocidadSombra = 5f;           // Velocidad a la que se mueve la sombra
 
-    private Rigidbody rb;
-    private bool activa = false;
-    private bool muerta = false;
+    private Rigidbody rb;                        // Rigidbody de la sombra
+    private bool activa = false;                 // Indica si la sombra está despierta
+    private bool muerta = false;                 // Indica si la sombra ha sido eliminada
 
-    private float xObjetivoPropio;
-    private bool ejecutandoAccion = false;
+    private float xObjetivoPropio;              // Posición X objetivo para moverse por bloques
+    private bool ejecutandoAccion = false;       // Controla si la sombra está en medio de un movimiento
 
-    private int indicePasosSombra = 0;
-    private int pasosPermitidos = 0;
-    private int pasosMaximos = 0;
+    private int indicePasosSombra = 0;          // Índice actual en el historial de movimientos del jugador
+    private int pasosPermitidos = 0;            // Tickets de movimiento disponibles para sincronizar con el jugador
+    private int pasosMaximos = 0;               // Límite de pasos que puede realizar la sombra
 
     void Start()
     {
@@ -27,7 +27,7 @@ public class SombraAcosadora : MonoBehaviour
         rb.isKinematic = true;
     }
 
-    public bool EstaActiva() => activa && !muerta;
+    public bool EstaActiva() => activa && !muerta; // Método útil para otros scripts (similar a playerOcupado en MovimientoPorBloques)
 
     // Se llama desde el Player para darle "tickets" de movimiento
     public void SincronizarPaso()
@@ -40,7 +40,7 @@ public class SombraAcosadora : MonoBehaviour
 
     void Update()
     {
-        // Despertar cuando el jugador alcance el límite de movimientos inicial
+        // Despertar la sombra cuando el jugador alcance los movimientos iniciales
         if (!activa && scriptJugador.movimientosRealizados >= movimientosParaActivar)
         {
             DespertarSombra();
@@ -49,17 +49,16 @@ public class SombraAcosadora : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Condiciones para no ejecutar movimientos
         if (!activa || muerta || pasosPermitidos <= 0 || indicePasosSombra >= pasosMaximos)
             return;
 
-        // Leemos el comando grabado (Izquierda, Derecha o Escalera)
-        // Usamos el enum definido en el script del Player
+        // Leemos el comando grabado del historial del jugador
         MovimientoPorBloques25D.TipoMovimiento comando = scriptJugador.historialComandos[indicePasosSombra];
 
         if (comando == MovimientoPorBloques25D.TipoMovimiento.Escalera)
         {
-            // Buscamos si estamos dentro de un trigger de escalera
-            // Podemos usar un OverlapSphere pequeño para encontrar el script de la escalera
+            // Buscamos triggers de escalera cercanos para ejecutar teletransporte
             Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.5f);
             foreach (var hit in hitColliders)
             {
@@ -71,11 +70,11 @@ public class SombraAcosadora : MonoBehaviour
                 }
             }
 
-            FinalizarTurno();
+            FinalizarTurno(); // Similar a liberar pasos del jugador
         }
         else
         {
-            // Lógica de movimiento por bloques independiente
+            // Movimiento horizontal por bloques
             if (!ejecutandoAccion)
             {
                 float direccion = (comando == MovimientoPorBloques25D.TipoMovimiento.Derecha) ? 1f : -1f;
@@ -85,14 +84,14 @@ public class SombraAcosadora : MonoBehaviour
 
             float nuevaX = Mathf.MoveTowards(rb.position.x, xObjetivoPropio, velocidadSombra * Time.fixedDeltaTime);
 
-            // Mantenemos su propia Y (gravedad) mientras se mueve en X
+            // Mantener Y y Z constantes (2.5D)
             rb.MovePosition(new Vector3(nuevaX, rb.position.y, rb.position.z));
 
             if (Mathf.Abs(nuevaX - xObjetivoPropio) < 0.01f)
             {
                 rb.MovePosition(new Vector3(xObjetivoPropio, rb.position.y, rb.position.z));
                 ejecutandoAccion = false;
-                FinalizarTurno();
+                FinalizarTurno(); // Similar a desbloquear input del jugador
             }
         }
     }
@@ -101,9 +100,7 @@ public class SombraAcosadora : MonoBehaviour
     {
         indicePasosSombra++;
         pasosPermitidos--;
-        ejecutandoAccion = false; // <--- ESTO ES CLAVE
-                                  // Al ser falso, el próximo FixedUpdate recalculará xObjetivoPropio 
-                                  // basándose en la posición ACTUAL (la del portal).
+        ejecutandoAccion = false; // Clave para recalcular en el próximo FixedUpdate
     }
 
     void DespertarSombra()
@@ -113,15 +110,14 @@ public class SombraAcosadora : MonoBehaviour
         GetComponent<Collider>().enabled = true;
 
         rb.isKinematic = false;
-        // Congelamos rotaciones y eje Z para el 2.5D
-        rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+        rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ; // Congelar Z y rotación para 2.5D
 
         indicePasosSombra = 0;
-        pasosMaximos = scriptJugador.movimientosRealizados;
+        pasosMaximos = scriptJugador.movimientosRealizados; // Sombra reproduce todos los pasos que hizo el jugador hasta despertar
         pasosPermitidos = 0;
     }
 
-    // Método restaurado para colisiones con trampas, etc.
+    // Método para colisiones con trampas o muerte directa
     public void Morir()
     {
         muerta = true;
@@ -131,27 +127,21 @@ public class SombraAcosadora : MonoBehaviour
 
     public void ResetearMovimiento()
     {
-        // Al poner esto en false, obligamos a la sombra a que en el próximo 
-        // FixedUpdate recalcule su 'xObjetivoPropio' desde su nueva posición X.
-        ejecutandoAccion = false;
+        ejecutandoAccion = false; // Fuerza a recalcular objetivo X en FixedUpdate
     }
 
     public void CompletarPasoPorTeleport()
     {
         ejecutandoAccion = false;
-        // Consumimos el "ticket" del movimiento que nos metió al portal
-        // para que no intente repetirlo al salir.
-        indicePasosSombra++;
+        indicePasosSombra++; // Consumimos el paso
         pasosPermitidos--;
     }
 
-    // Método de utilidad para el Player si necesita bloquear inputs
-    public bool TienePasosPendientes() => pasosPermitidos > 0;
+    public bool TienePasosPendientes() => pasosPermitidos > 0; // Similar a comprobar si el jugador puede moverse
 
-    // Dentro de SombraAcosadora.cs
     public bool EstaOcupada()
     {
-        // Está ocupada si: está ejecutando un paso lateral O si su velocidad vertical es significativa (cayendo)
+        // Ocupada si está moviéndose o cayendo
         bool cayendo = Mathf.Abs(rb.velocity.y) > 0.1f;
         return ejecutandoAccion || cayendo || TienePasosPendientes();
     }

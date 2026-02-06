@@ -3,114 +3,127 @@ using System.Collections.Generic;
 
 public class MovimientoPorBloques25D : MonoBehaviour
 {
+    // Tipos de movimientos que el jugador puede realizar
     public enum TipoMovimiento { Izquierda, Derecha, Escalera }
 
-    public float tamañoBloque = 1f;
-    public float velocidad = 10f;
-    public float distanciaSuelo = 0.2f;
-    public LayerMask capaSuelo;
+    public float tamañoBloque = 1f; // Distancia que cubre un paso
+    public float velocidad = 10f;   // Velocidad de movimiento horizontal
+    public float distanciaSuelo = 0.2f; // Distancia para detectar si el jugador está sobre el suelo
+    public LayerMask capaSuelo;     // Capa para raycast de suelo
 
-    public SombraAcosadora scriptSombra;
+    public SombraAcosadora scriptSombra; // Referencia al script de la sombra acosadora
 
-    public int movimientosRealizados = 0;
-    // Esta es la ÚNICA lista que necesitamos ahora
-    public List<TipoMovimiento> historialComandos = new List<TipoMovimiento>();
+    public int movimientosRealizados = 0; // Contador de pasos realizados por el jugador
+    public List<TipoMovimiento> historialComandos = new List<TipoMovimiento>(); 
+    // Lista donde guardamos todos los movimientos para que la sombra los pueda reproducir
 
-    private Rigidbody rb;
-    private float xObjetivo;
-    private bool moviendo = false;
-    private bool estaEnSuelo;
+    private Rigidbody rb;          // Rigidbody del jugador
+    private float xObjetivo;       // Posición X a la que el jugador se dirige
+    private bool moviendo = false; // Indica si el jugador está en medio de un movimiento
+    private bool estaEnSuelo;      // Para comprobar si puede moverse
 
-    [HideInInspector] public bool enEscalera = false;
-    [HideInInspector] public bool enTeletransporte = false;
+    [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador está en escalera
+    [HideInInspector] public bool enTeletransporte = false; // Flag para teletransporte
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        xObjetivo = rb.position.x;
-        CongelarY();
+        rb = GetComponent<Rigidbody>(); // Obtenemos el Rigidbody
+        xObjetivo = rb.position.x;      // Inicializamos el objetivo X con la posición actual
+        CongelarY();                    // Congelamos la posición Y y rotaciones innecesarias
     }
 
     void Update()
     {
-        ComprobarSuelo();
+        ComprobarSuelo(); // Chequeamos si el jugador está sobre el suelo
 
-        // Manejo de físicas (Y)
+        // Control físico vertical
         if (estaEnSuelo && !enEscalera && !enTeletransporte)
-            CongelarY();
+            CongelarY(); // Congelamos Y si está en suelo y no está en escalera ni teletransporte
         else
-            LiberarY();
+            LiberarY();  // Permitimos movimiento vertical en el aire, escalera o teletransporte
 
-        // LA ADUANA UNIFICADA
-        // Definimos si la sombra está haciendo algo
+        // BLOQUEO DE INPUT UNIFICADO:
+        // Bloqueamos input si el jugador no está en suelo, si ya está moviéndose, o si la sombra está ocupada
         bool sombraOcupada = (scriptSombra != null && scriptSombra.EstaActiva() && scriptSombra.EstaOcupada());
 
-        // Si el player se mueve, o está en el aire, o la sombra está trabajando: bloqueamos input.
         if (!estaEnSuelo || moviendo || sombraOcupada)
-            return;
+            return; // Salimos del Update si alguna condición de bloqueo se cumple
 
         // LECTURA DE INPUTS
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A)) // Mover a la izquierda
         {
-            xObjetivo -= tamañoBloque;
-            moviendo = true;
-            historialComandos.Add(TipoMovimiento.Izquierda);
+            xObjetivo -= tamañoBloque;           // Calculamos la nueva posición X
+            moviendo = true;                      // Indicamos que estamos en movimiento
+            historialComandos.Add(TipoMovimiento.Izquierda); // Registramos el movimiento para la sombra
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if (Input.GetKeyDown(KeyCode.D)) // Mover a la derecha
         {
             xObjetivo += tamañoBloque;
             moviendo = true;
             historialComandos.Add(TipoMovimiento.Derecha);
         }
+        // Observación: No se gestionan diagonales ni inputs simultáneos, simplificando movimiento por bloques
     }
 
     void FixedUpdate()
     {
-        if (!moviendo) return;
+        if (!moviendo) return; // Solo calculamos física si estamos moviéndonos
 
+        // Movemos suavemente hacia la posición objetivo usando MoveTowards
         float nuevaX = Mathf.MoveTowards(rb.position.x, xObjetivo, velocidad * Time.fixedDeltaTime);
         rb.MovePosition(new Vector3(nuevaX, rb.position.y, rb.position.z));
 
+        // Comprobamos si hemos llegado al objetivo
         if (Mathf.Abs(nuevaX - xObjetivo) < 0.01f)
         {
             rb.MovePosition(new Vector3(xObjetivo, rb.position.y, rb.position.z));
-            moviendo = false;
-            movimientosRealizados++;
+            moviendo = false;          // Terminamos el movimiento
+            movimientosRealizados++;   // Incrementamos contador de pasos
 
+            // Sincronizamos paso con la sombra (similar a SombraAcosadora.SincronizarPaso)
             if (scriptSombra != null)
                 scriptSombra.SincronizarPaso();
         }
     }
 
+    // Comprueba si el jugador está sobre el suelo mediante raycast
     void ComprobarSuelo()
     {
         estaEnSuelo = Physics.Raycast(transform.position, Vector3.down, distanciaSuelo, capaSuelo);
     }
 
+    // Congela el eje Y y rotaciones innecesarias para movimiento por bloques
     void CongelarY()
     {
-        rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints = RigidbodyConstraints.FreezePositionY 
+                       | RigidbodyConstraints.FreezeRotationX 
+                       | RigidbodyConstraints.FreezeRotationZ;
     }
 
+    // Libera la posición Y para permitir saltos o teletransportes
     void LiberarY()
     {
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX 
+                       | RigidbodyConstraints.FreezeRotationZ;
     }
 
+    // Método para teletransportar al jugador (por ejemplo, portal)
     public void Teletransportar(Vector3 destino)
     {
-        enTeletransporte = true;
-        LiberarY();
-        moviendo = false;
+        enTeletransporte = true; // Indicamos que estamos en teletransporte
+        LiberarY();              // Permitimos que se mueva verticalmente
+        moviendo = false;        // Cancelamos movimiento actual
         rb.velocity = Vector3.zero;
-        rb.position = destino;
-        xObjetivo = destino.x;
+        rb.position = destino;   // Colocamos al jugador en la posición de destino
+        xObjetivo = destino.x;   // Actualizamos objetivo X
     }
 
+    // Registrar paso de escalera
     public void RegistrarPasoDeEscalera()
     {
-        movimientosRealizados++;
-        historialComandos.Add(TipoMovimiento.Escalera);
-        if (scriptSombra != null) scriptSombra.SincronizarPaso();
+        movimientosRealizados++;                        // Incrementamos contador de movimientos
+        historialComandos.Add(TipoMovimiento.Escalera); // Registramos en historial
+        if (scriptSombra != null) 
+            scriptSombra.SincronizarPaso();            // Sincronizamos paso con la sombra
     }
 }

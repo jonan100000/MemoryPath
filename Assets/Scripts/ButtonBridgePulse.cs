@@ -2,44 +2,45 @@ using UnityEngine;
 
 public class ButtonBridgePulse : MonoBehaviour
 {
-    public BridgeController puente;
+    public BridgeController puente; // Referencia al puente que este botón controla
 
     [Header("Referencias Visuales (Hijos)")]
-    public GameObject visualActivado;
-    public GameObject visualDesactivado;
+    public GameObject visualActivado;   // Visual cuando el botón está presionado
+    public GameObject visualDesactivado; // Visual cuando el botón no está presionado
 
-    void Start() => SetVisual(false);
+    void Start() => SetVisual(false); // Inicializamos el botón en estado “no presionado”
 
     private void OnTriggerEnter(Collider other)
     {
-        // Comprobamos si es el Jugador O la Sombra
+        // Verificamos si el collider pertenece al jugador o a la sombra
         if (EsEntidadValida(other))
         {
-            SetVisual(true);
+            SetVisual(true); // Activamos la visual de botón presionado
             
             if (puente != null)
             {
-                puente.AlternarPuente();
+                puente.AlternarPuente(); // Cambiamos el estado del puente (sube/baja)
             }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // Comprobamos si es el Jugador O la Sombra
+        // Cuando la entidad sale, desactivamos la visual
         if (EsEntidadValida(other))
         {
             SetVisual(false);
         }
     }
 
-    // Método de ayuda para detectar ambas entidades
+    // Método de ayuda para detectar si la entidad es válida (Jugador o Sombra)
     private bool EsEntidadValida(Collider col)
     {
         return col.GetComponent<MovimientoPorBloques25D>() != null || 
                col.GetComponent<SombraAcosadora>() != null;
     }
 
+    // Cambia la visual del botón según esté presionado o no
     private void SetVisual(bool presionado)
     {
         if (visualActivado != null) visualActivado.SetActive(presionado);
