@@ -1120,7 +1120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scriptJugador: {fileID: 1876001600}
-  movimientosParaActivar: 6
+  movimientosParaActivar: 20
   velocidadSombra: 5
 --- !u!1 &774400382
 GameObject:
@@ -2172,7 +2172,7 @@ MonoBehaviour:
     m_Bits: 128
   scriptSombra: {fileID: 761169688}
   movimientosRealizados: 0
-  historialPosiciones: []
+  historialComandos: 
   enEscalera: 0
   enTeletransporte: 0
 --- !u!54 &1876001601
@@ -3148,7 +3148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed7448e7c24eac4596e03519a537a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activo: 0
+  activo: 1
   visualActivado: {fileID: 2045105917}
   visualDesactivado: {fileID: 800869692}
 --- !u!135 &5663118450790836676
