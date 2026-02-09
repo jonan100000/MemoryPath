@@ -1,30 +1,38 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class MovimientoPorBloques25D : MonoBehaviour
+public partial class MovimientoPorBloques25D : MonoBehaviour
 {
+    // Tipos y configuracion
     // Tipos de movimientos que el jugador puede realizar
     public enum TipoMovimiento { Izquierda, Derecha, Escalera }
 
     public float tamañoBloque = 1f; // Distancia que cubre un paso
+    // Configuracion de movimiento
     public float velocidad = 10f;   // Velocidad de movimiento horizontal
     public float distanciaSuelo = 0.2f; // Distancia para detectar si el jugador está sobre el suelo
     public LayerMask capaSuelo;     // Capa para raycast de suelo
 
+    // Referencias
     public SombraAcosadora scriptSombra; // Referencia al script de la sombra acosadora
 
+    // Estado e historial
     public int movimientosRealizados = 0; // Contador de pasos realizados por el jugador
     public List<TipoMovimiento> historialComandos = new List<TipoMovimiento>(); 
     // Lista donde guardamos todos los movimientos para que la sombra los pueda reproducir
 
+    // Estado interno
     private Rigidbody rb;          // Rigidbody del jugador
     private float xObjetivo;       // Posición X a la que el jugador se dirige
     private bool moviendo = false; // Indica si el jugador está en medio de un movimiento
     private bool estaEnSuelo;      // Para comprobar si puede moverse
+    private int teleportsSinTurno = 0; // Conteo de teletransportes sin terminar turno
+    private const int maxTeleportsSinTurno = 10;
 
     [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador está en escalera
     [HideInInspector] public bool enTeletransporte = false; // Flag para teletransporte
 
+    // Ciclo de vida Unity
     void Start()
     {
         rb = GetComponent<Rigidbody>(); // Obtenemos el Rigidbody
@@ -32,6 +40,7 @@ public class MovimientoPorBloques25D : MonoBehaviour
         CongelarY();                    // Congelamos la posición Y y rotaciones innecesarias
     }
 
+    // Input y logica por frame
     void Update()
     {
         ComprobarSuelo(); // Chequeamos si el jugador está sobre el suelo
@@ -44,9 +53,7 @@ public class MovimientoPorBloques25D : MonoBehaviour
 
         // BLOQUEO DE INPUT UNIFICADO:
         // Bloqueamos input si el jugador no está en suelo, si ya está moviéndose, o si la sombra está ocupada
-        bool sombraOcupada = (scriptSombra != null && scriptSombra.EstaActiva() && scriptSombra.EstaOcupada());
-
-        if (!estaEnSuelo || moviendo || sombraOcupada)
+        if (!PuedeRecibirInput())
             return; // Salimos del Update si alguna condición de bloqueo se cumple
 
         // LECTURA DE INPUTS
@@ -65,6 +72,7 @@ public class MovimientoPorBloques25D : MonoBehaviour
         // Observación: No se gestionan diagonales ni inputs simultáneos, simplificando movimiento por bloques
     }
 
+    // Fisica de movimiento por bloques
     void FixedUpdate()
     {
         if (!moviendo) return; // Solo calculamos física si estamos moviéndonos
@@ -79,51 +87,10 @@ public class MovimientoPorBloques25D : MonoBehaviour
             rb.MovePosition(new Vector3(xObjetivo, rb.position.y, rb.position.z));
             moviendo = false;          // Terminamos el movimiento
             movimientosRealizados++;   // Incrementamos contador de pasos
+            teleportsSinTurno = 0; // Termina el turno del jugador
 
             // Sincronizamos paso con la sombra (similar a SombraAcosadora.SincronizarPaso)
-            if (scriptSombra != null)
-                scriptSombra.SincronizarPaso();
+            TurnCoordinator.RegistrarPasoJugador(scriptSombra);
         }
-    }
-
-    // Comprueba si el jugador está sobre el suelo mediante raycast
-    void ComprobarSuelo()
-    {
-        estaEnSuelo = Physics.Raycast(transform.position, Vector3.down, distanciaSuelo, capaSuelo);
-    }
-
-    // Congela el eje Y y rotaciones innecesarias para movimiento por bloques
-    void CongelarY()
-    {
-        rb.constraints = RigidbodyConstraints.FreezePositionY 
-                       | RigidbodyConstraints.FreezeRotationX 
-                       | RigidbodyConstraints.FreezeRotationZ;
-    }
-
-    // Libera la posición Y para permitir saltos o teletransportes
-    void LiberarY()
-    {
-        rb.constraints = RigidbodyConstraints.FreezeRotationX 
-                       | RigidbodyConstraints.FreezeRotationZ;
-    }
-
-    // Método para teletransportar al jugador (por ejemplo, portal)
-    public void Teletransportar(Vector3 destino)
-    {
-        enTeletransporte = true; // Indicamos que estamos en teletransporte
-        LiberarY();              // Permitimos que se mueva verticalmente
-        moviendo = false;        // Cancelamos movimiento actual
-        rb.velocity = Vector3.zero;
-        rb.position = destino;   // Colocamos al jugador en la posición de destino
-        xObjetivo = destino.x;   // Actualizamos objetivo X
-    }
-
-    // Registrar paso de escalera
-    public void RegistrarPasoDeEscalera()
-    {
-        movimientosRealizados++;                        // Incrementamos contador de movimientos
-        historialComandos.Add(TipoMovimiento.Escalera); // Registramos en historial
-        if (scriptSombra != null) 
-            scriptSombra.SincronizarPaso();            // Sincronizamos paso con la sombra
     }
 }

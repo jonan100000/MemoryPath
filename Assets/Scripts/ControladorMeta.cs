@@ -3,8 +3,10 @@ using UnityEngine.SceneManagement;
 
 public sealed class ControladorMeta : MonoBehaviour
 {
+    // Referencias UI
     public GameObject panelVictoria; // Panel que se activa cuando el jugador alcanza la meta
 
+    // Triggers
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -21,6 +23,7 @@ public sealed class ControladorMeta : MonoBehaviour
         }
     }
 
+    // UI: volver al menu principal
     public void IrAlMenu()
     {
         // IMPORTANTE: Resetear el tiempo antes de cambiar de escena
@@ -28,6 +31,7 @@ public sealed class ControladorMeta : MonoBehaviour
         SceneManager.LoadScene("MenuPrincipal");
     }
 
+    // UI: cargar el siguiente nivel o volver al menu
     public void SiguienteNivel()
     {
         // Despausar el juego

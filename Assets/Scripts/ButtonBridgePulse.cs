@@ -2,14 +2,17 @@ using UnityEngine;
 
 public class ButtonBridgePulse : MonoBehaviour
 {
+    // Referencias
     public BridgeController puente; // Referencia al puente que este botón controla
 
+    // Referencias visuales
     [Header("Referencias Visuales (Hijos)")]
     public GameObject visualActivado;   // Visual cuando el botón está presionado
     public GameObject visualDesactivado; // Visual cuando el botón no está presionado
 
     void Start() => SetVisual(false); // Inicializamos el botón en estado “no presionado”
 
+    // Triggers
     private void OnTriggerEnter(Collider other)
     {
         // Verificamos si el collider pertenece al jugador o a la sombra
@@ -34,6 +37,7 @@ public class ButtonBridgePulse : MonoBehaviour
     }
 
     // Método de ayuda para detectar si la entidad es válida (Jugador o Sombra)
+    // Helpers de validacion
     private bool EsEntidadValida(Collider col)
     {
         return col.GetComponent<MovimientoPorBloques25D>() != null || 
@@ -41,6 +45,7 @@ public class ButtonBridgePulse : MonoBehaviour
     }
 
     // Cambia la visual del botón según esté presionado o no
+    // Helpers visuales
     private void SetVisual(bool presionado)
     {
         if (visualActivado != null) visualActivado.SetActive(presionado);

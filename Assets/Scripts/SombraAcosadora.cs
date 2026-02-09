@@ -1,11 +1,13 @@
 using UnityEngine;
 
-public class SombraAcosadora : MonoBehaviour
+public partial class SombraAcosadora : MonoBehaviour
 {
+    // Referencias y configuracion
     public MovimientoPorBloques25D scriptJugador; // Referencia al script del jugador para leer movimientos
     public int movimientosParaActivar = 5;       // Número de pasos que el jugador debe realizar para despertar a la sombra
     public float velocidadSombra = 5f;           // Velocidad a la que se mueve la sombra
 
+    // Estado interno
     private Rigidbody rb;                        // Rigidbody de la sombra
     private bool activa = false;                 // Indica si la sombra está despierta
     private bool muerta = false;                 // Indica si la sombra ha sido eliminada
@@ -16,7 +18,11 @@ public class SombraAcosadora : MonoBehaviour
     private int indicePasosSombra = 0;          // Índice actual en el historial de movimientos del jugador
     private int pasosPermitidos = 0;            // Tickets de movimiento disponibles para sincronizar con el jugador
     private int pasosMaximos = 0;               // Límite de pasos que puede realizar la sombra
+    private int teleportsSinTurno = 0;          // Conteo de teletransportes sin terminar turno
+    private const int maxTeleportsSinTurno = 10;
+    private bool HaTerminadoReproduccion() => indicePasosSombra >= pasosMaximos;
 
+    // Ciclo de vida Unity
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -27,17 +33,21 @@ public class SombraAcosadora : MonoBehaviour
         rb.isKinematic = true;
     }
 
+    // API publica: estado general
+
     public bool EstaActiva() => activa && !muerta; // Método útil para otros scripts (similar a playerOcupado en MovimientoPorBloques)
 
     // Se llama desde el Player para darle "tickets" de movimiento
+    // API publica: recibe un paso del jugador
     public void SincronizarPaso()
     {
-        if (activa && !muerta)
+        if (activa && !muerta && !HaTerminadoReproduccion())
         {
             pasosPermitidos++;
         }
     }
 
+    // Logica por frame: despertar
     void Update()
     {
         // Despertar la sombra cuando el jugador alcance los movimientos iniciales
@@ -47,10 +57,22 @@ public class SombraAcosadora : MonoBehaviour
         }
     }
 
+    // Fisica por turnos: reproduce historial
     void FixedUpdate()
     {
         // Condiciones para no ejecutar movimientos
-        if (!activa || muerta || pasosPermitidos <= 0 || indicePasosSombra >= pasosMaximos)
+        if (!activa || muerta || TurnCoordinator.TeleportBloqueaMovimiento())
+            return;
+
+        if (HaTerminadoReproduccion())
+        {
+            // Ya no quedan pasos por reproducir, limpiamos cualquier ticket pendiente.
+            pasosPermitidos = 0;
+            ejecutandoAccion = false;
+            return;
+        }
+
+        if (pasosPermitidos <= 0)
             return;
 
         // Leemos el comando grabado del historial del jugador
@@ -96,13 +118,17 @@ public class SombraAcosadora : MonoBehaviour
         }
     }
 
+    // Turno: consume un paso y limpia flags
     void FinalizarTurno()
     {
         indicePasosSombra++;
         pasosPermitidos--;
+        if (pasosPermitidos < 0) pasosPermitidos = 0;
+        teleportsSinTurno = 0; // Termina el turno de la sombra
         ejecutandoAccion = false; // Clave para recalcular en el próximo FixedUpdate
     }
 
+    // Activacion inicial
     void DespertarSombra()
     {
         activa = true;
@@ -115,34 +141,6 @@ public class SombraAcosadora : MonoBehaviour
         indicePasosSombra = 0;
         pasosMaximos = scriptJugador.movimientosRealizados; // Sombra reproduce todos los pasos que hizo el jugador hasta despertar
         pasosPermitidos = 0;
-    }
-
-    // Método para colisiones con trampas o muerte directa
-    public void Morir()
-    {
-        muerta = true;
-        rb.velocity = Vector3.zero;
-        gameObject.SetActive(false);
-    }
-
-    public void ResetearMovimiento()
-    {
-        ejecutandoAccion = false; // Fuerza a recalcular objetivo X en FixedUpdate
-    }
-
-    public void CompletarPasoPorTeleport()
-    {
-        ejecutandoAccion = false;
-        indicePasosSombra++; // Consumimos el paso
-        pasosPermitidos--;
-    }
-
-    public bool TienePasosPendientes() => pasosPermitidos > 0; // Similar a comprobar si el jugador puede moverse
-
-    public bool EstaOcupada()
-    {
-        // Ocupada si está moviéndose o cayendo
-        bool cayendo = Mathf.Abs(rb.velocity.y) > 0.1f;
-        return ejecutandoAccion || cayendo || TienePasosPendientes();
+        teleportsSinTurno = 0;
     }
 }

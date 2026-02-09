@@ -2,23 +2,28 @@ using UnityEngine;
 
 public class Stair : MonoBehaviour
 {
+    // Referencias
     public Transform topPoint;    // Punto superior de la escalera
     public Transform bottomPoint; // Punto inferior de la escalera
 
+    // Configuracion visual
     [Range(0f, 1f)]
     public float transparentAlpha = 0.4f; // Transparencia que se aplica al jugador cuando está en la escalera
 
+    // Estado interno
     private MeshRenderer mr;           // MeshRenderer del objeto escalera
     private Material mat;              // Material para cambiar transparencia
     private MovimientoPorBloques25D playerScript; // Referencia al script del jugador cuando entra en la escalera
     private SombraAcosadora sombraScript;         // Referencia al script de la sombra cuando entra en la escalera
 
+    // Ciclo de vida Unity
     void Start()
     {
         mr = GetComponent<MeshRenderer>(); // Obtenemos el MeshRenderer
         mat = mr.material;                 // Guardamos el material para manipular transparencia
     }
 
+    // Input de escalera (solo jugador)
     void Update()
     {
         // Solo el PLAYER usa input directo para subir/bajar
@@ -43,6 +48,7 @@ public class Stair : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.S))
             {
+                TurnCoordinator.BloquearPorTeleport();
                 playerScript.Teletransportar(bottomPoint.position);
                 playerScript.RegistrarPasoDeEscalera();
             }
@@ -50,9 +56,11 @@ public class Stair : MonoBehaviour
     }
 
     // Método llamado por la sombra para teletransportarse por la escalera
+    // Accion de sombra: teletransporta segun posicion
     public void EjecutarTeletransporteSombra()
     {
         if (sombraScript == null) return; // Si no hay sombra, salimos
+        if (!TurnCoordinator.PuedeTeletransportar()) return;
 
         // Calculamos distancia desde la base y desde la cima
         float distBottom = Vector3.Distance(sombraScript.transform.position, bottomPoint.position);
@@ -62,12 +70,11 @@ public class Stair : MonoBehaviour
         Vector3 destino = (distBottom < distTop) ? topPoint.position : bottomPoint.position;
 
         // Teletransportamos físicamente a la sombra
-        sombraScript.transform.position = destino;
-        Rigidbody rbS = sombraScript.GetComponent<Rigidbody>();
-        if (rbS != null) rbS.position = destino; // Aseguramos que el Rigidbody también se actualice
+        sombraScript.Teletransportar(destino, false);
     }
 
     // Detecta cuando algo entra en el trigger de la escalera
+    // Triggers
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -101,6 +108,7 @@ public class Stair : MonoBehaviour
     }
 
     // Cambia la transparencia del material de la escalera
+    // Helpers visuales
     void SetTransparency(float alpha)
     {
         Color c = mat.color;
@@ -108,3 +116,5 @@ public class Stair : MonoBehaviour
         mat.color = c;
     }
 }
+
+

@@ -239,7 +239,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6.1462917
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -344,7 +344,7 @@ GameObject:
   - component: {fileID: 295665095}
   - component: {fileID: 295665094}
   m_Layer: 7
-  m_Name: ground_1 (1)
+  m_Name: ground (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -506,7 +506,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Men\xFA Principal"
+  m_Text: MENU PRINCIPAL
 --- !u!222 &329261379
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -744,7 +744,7 @@ GameObject:
   - component: {fileID: 559571549}
   - component: {fileID: 559571548}
   m_Layer: 7
-  m_Name: ground_1
+  m_Name: ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1120,8 +1120,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scriptJugador: {fileID: 1876001600}
-  movimientosParaActivar: 20
-  velocidadSombra: 5
+  movimientosParaActivar: 16
+  velocidadSombra: 10
 --- !u!1 &774400382
 GameObject:
   m_ObjectHideFlags: 0
@@ -1372,7 +1372,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 0.25
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &999584853
 Transform:
@@ -1402,7 +1402,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destino: {fileID: 8092857034638711868}
-  activo: 0
+  activo: 1
   prefabAbierto: {fileID: 3927139299739726370, guid: 8dae6d611a819484ba4cc5adb3da8ee5, type: 3}
   prefabCerrado: {fileID: 6596853795010449790, guid: c62e6d0e0b7a6f540a2c88543be875a3, type: 3}
   botonesAsociados:
@@ -1885,7 +1885,7 @@ GameObject:
   - component: {fileID: 1416958863}
   - component: {fileID: 1416958862}
   m_Layer: 7
-  m_Name: ground_1 (2)
+  m_Name: ground (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2214,6 +2214,66 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a1a48779a2ce3f49aed1708bef1c58f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1898784363
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1898784366}
+  - component: {fileID: 1898784365}
+  - component: {fileID: 1898784364}
+  m_Layer: 0
+  m_Name: _Systen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1898784364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898784363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d9b01228db30841b2cfd7919dcd01f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  retrasoReiniciar: 1.5
+  efectoMuertePrefab: {fileID: 0}
+--- !u!114 &1898784365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898784363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d90536776d87fc145aabffcdd9215fcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entidadesMoviendose: 0
+--- !u!4 &1898784366
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898784363}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1906181729
 GameObject:
   m_ObjectHideFlags: 0
@@ -2227,7 +2287,7 @@ GameObject:
   - component: {fileID: 1906181731}
   - component: {fileID: 1906181730}
   m_Layer: 7
-  m_Name: ground_1 (4)
+  m_Name: ground (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2357,7 +2417,7 @@ GameObject:
   - component: {fileID: 1987807427}
   - component: {fileID: 1987807426}
   m_Layer: 7
-  m_Name: ground_1 (3)
+  m_Name: ground (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2462,7 +2522,7 @@ GameObject:
   - component: {fileID: 2025300751}
   - component: {fileID: 2025300750}
   m_Layer: 7
-  m_Name: ground_1 (5)
+  m_Name: ground (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3066,7 +3126,7 @@ Transform:
   m_GameObject: {fileID: 2133051135}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -5, z: 0}
+  m_LocalPosition: {x: 0, y: -6, z: 0}
   m_LocalScale: {x: 25, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3170,7 +3230,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 0.25
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7452930634907135271
 MonoBehaviour:
@@ -3185,7 +3245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destino: {fileID: 999584853}
-  activo: 0
+  activo: 1
   prefabAbierto: {fileID: 3927139299739726370, guid: 8dae6d611a819484ba4cc5adb3da8ee5, type: 3}
   prefabCerrado: {fileID: 6596853795010449790, guid: c62e6d0e0b7a6f540a2c88543be875a3, type: 3}
   botonesAsociados:
@@ -3209,7 +3269,11 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1898784366}
+  - {fileID: 1013611595}
   - {fileID: 112610897}
+  - {fileID: 2133051139}
+  - {fileID: 697216894}
   - {fileID: 1876001599}
   - {fileID: 761169687}
   - {fileID: 559571551}
@@ -3219,12 +3283,9 @@ SceneRoots:
   - {fileID: 1906181733}
   - {fileID: 2025300753}
   - {fileID: 1921841513279528237}
-  - {fileID: 409721066}
   - {fileID: 8092857034638711868}
   - {fileID: 999584853}
-  - {fileID: 697216894}
   - {fileID: 464420775}
   - {fileID: 1122829336}
-  - {fileID: 1013611595}
+  - {fileID: 409721066}
   - {fileID: 774400385}
-  - {fileID: 2133051139}
