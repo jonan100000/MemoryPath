@@ -28,6 +28,8 @@ public partial class PlayerMovement : MonoBehaviour
     private bool estaEnSuelo;      // Para comprobar si puede moverse
     private int teleportsSinTurno = 0; // Conteo de teletransportes sin terminar turno
     private const int maxTeleportsSinTurno = 10;
+    private const float FacingRightY = 0f;
+    private const float FacingLeftY = 180f;
 
     [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador está en escalera
     [HideInInspector] public bool enTeletransporte = false; // Flag para teletransporte
@@ -62,12 +64,14 @@ public partial class PlayerMovement : MonoBehaviour
             xObjetivo -= tamañoBloque;           // Calculamos la nueva posición X
             moviendo = true;                      // Indicamos que estamos en movimiento
             historialComandos.Add(TipoMovimiento.Izquierda); // Registramos el movimiento para la sombra
+            SetFacing(FacingLeftY);
         }
         else if (Input.GetKeyDown(KeyCode.D)) // Mover a la derecha
         {
             xObjetivo += tamañoBloque;
             moviendo = true;
             historialComandos.Add(TipoMovimiento.Derecha);
+            SetFacing(FacingRightY);
         }
         // Observación: No se gestionan diagonales ni inputs simultáneos, simplificando movimiento por bloques
     }
@@ -92,5 +96,13 @@ public partial class PlayerMovement : MonoBehaviour
             // Sincronizamos paso con la sombra (similar a SombraAcosadora.SincronizarPaso)
             TurnCoordinator.RegistrarPasoJugador(scriptSombra);
         }
+    }
+    private void SetFacing(float yRotation)
+    {
+        Vector3 euler = transform.localEulerAngles;
+        if (Mathf.Abs(Mathf.DeltaAngle(euler.y, yRotation)) < 0.1f)
+            return;
+
+        transform.localEulerAngles = new Vector3(euler.x, yRotation, euler.z);
     }
 }

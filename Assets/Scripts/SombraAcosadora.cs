@@ -22,6 +22,8 @@ public partial class SombraAcosadora : MonoBehaviour
     private int pasosMaximos = 0;               // Límite de pasos que puede realizar la sombra
     private int teleportsSinTurno = 0;          // Conteo de teletransportes sin terminar turno
     private const int maxTeleportsSinTurno = 10;
+    private const float FacingRightY = 0f;
+    private const float FacingLeftY = 180f;
     private bool HaTerminadoReproduccion() => indicePasosSombra >= pasosMaximos;
 
     // Ciclo de vida Unity
@@ -119,6 +121,7 @@ public partial class SombraAcosadora : MonoBehaviour
             if (!ejecutandoAccion)
             {
                 float direccion = (comando == PlayerMovement.TipoMovimiento.Derecha) ? 1f : -1f;
+                SetFacing(comando == PlayerMovement.TipoMovimiento.Derecha ? FacingRightY : FacingLeftY);
                 xObjetivoPropio = rb.position.x + (direccion * scriptJugador.tamañoBloque);
                 ejecutandoAccion = true;
             }
@@ -162,7 +165,12 @@ public partial class SombraAcosadora : MonoBehaviour
         pasosPermitidos = 0;
         teleportsSinTurno = 0;
     }
+    private void SetFacing(float yRotation)
+    {
+        Vector3 euler = transform.localEulerAngles;
+        if (Mathf.Abs(Mathf.DeltaAngle(euler.y, yRotation)) < 0.1f)
+            return;
+
+        transform.localEulerAngles = new Vector3(euler.x, yRotation, euler.z);
+    }
 }
-
-
-
