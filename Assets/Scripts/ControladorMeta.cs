@@ -9,14 +9,45 @@ public sealed class ControladorMeta : MonoBehaviour
     public GameObject animVictoria; // Animacion que aparece antes del menu
     public float retrasoVictoria = 3.5f;
     public AudioClip sonidoMeta;
+    public AudioClip sonidoMetaSecundario;
     public AudioSource audioSource;
+    public AudioSource audioSourceSecundario;
+    public AudioSource audioFondo;
+    public bool mantenerFondoEntreReinicios = true;
+    public bool detenerFondoAlGanar = true;
 
     private bool metaActivada = false;
+    private static AudioSource audioFondoPersistente;
 
     void Start()
     {
         if (animVictoria != null) animVictoria.SetActive(false);
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
+        if (audioSourceSecundario == null)
+        {
+            var sources = GetComponents<AudioSource>();
+            if (sources.Length > 1) audioSourceSecundario = sources[1];
+        }
+        PrepararAudioFondo();
+    }
+
+    private void PrepararAudioFondo()
+    {
+        if (!mantenerFondoEntreReinicios || audioFondo == null) return;
+
+        if (audioFondoPersistente != null && audioFondoPersistente != audioFondo)
+        {
+            Destroy(audioFondo.gameObject);
+            audioFondo = audioFondoPersistente;
+            return;
+        }
+
+        if (audioFondoPersistente == null)
+        {
+            audioFondoPersistente = audioFondo;
+            if (audioFondo.transform.parent != null) audioFondo.transform.SetParent(null);
+            DontDestroyOnLoad(audioFondo.gameObject);
+        }
     }
 
     // Triggers
@@ -37,10 +68,18 @@ public sealed class ControladorMeta : MonoBehaviour
 
     private IEnumerator MostrarVictoria()
     {
+        if (detenerFondoAlGanar && audioFondo != null) audioFondo.Stop();
+
         if (sonidoMeta != null)
         {
             if (audioSource != null) audioSource.PlayOneShot(sonidoMeta);
             else AudioSource.PlayClipAtPoint(sonidoMeta, transform.position);
+        }
+        if (sonidoMetaSecundario != null)
+        {
+            if (audioSourceSecundario != null) audioSourceSecundario.PlayOneShot(sonidoMetaSecundario);
+            else if (audioSource != null) audioSource.PlayOneShot(sonidoMetaSecundario);
+            else AudioSource.PlayClipAtPoint(sonidoMetaSecundario, transform.position);
         }
 
         if (animVictoria != null) animVictoria.SetActive(true);

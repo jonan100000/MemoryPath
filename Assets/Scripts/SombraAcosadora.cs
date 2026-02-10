@@ -11,6 +11,8 @@ public partial class SombraAcosadora : MonoBehaviour
     private Rigidbody rb;                        // Rigidbody de la sombra
     private bool activa = false;                 // Indica si la sombra está despierta
     private bool muerta = false;                 // Indica si la sombra ha sido eliminada
+    private SpriteRenderer spriteRenderer;       // SpriteRenderer de la sombra
+    private Stair stairActual;                   // Escalera actual en la que esta la sombra
 
     private float xObjetivoPropio;              // Posición X objetivo para moverse por bloques
     private bool ejecutandoAccion = false;       // Controla si la sombra está en medio de un movimiento
@@ -26,10 +28,11 @@ public partial class SombraAcosadora : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         // Estado inicial: invisible e intangible
-        var renderer = GetComponent<Renderer>();
-        if (renderer != null) renderer.enabled = false;
+        if (spriteRenderer != null) spriteRenderer.enabled = false;
         GetComponent<Collider>().enabled = false;
         rb.isKinematic = true;
     }
@@ -37,6 +40,11 @@ public partial class SombraAcosadora : MonoBehaviour
     // API publica: estado general
 
     public bool EstaActiva() => activa && !muerta; // Método útil para otros scripts (similar a playerOcupado en MovimientoPorBloques)
+
+    public void SetStair(Stair stair)
+    {
+        stairActual = stair;
+    }
 
     // Se llama desde el Player para darle "tickets" de movimiento
     // API publica: recibe un paso del jugador
@@ -81,18 +89,28 @@ public partial class SombraAcosadora : MonoBehaviour
 
         if (comando == PlayerMovement.TipoMovimiento.Escalera)
         {
+            if (!TurnCoordinator.PuedeTeletransportar()) return;
+
             // Buscamos triggers de escalera cercanos para ejecutar teletransporte
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.5f);
-            foreach (var hit in hitColliders)
+            Stair escalera = stairActual;
+            if (escalera == null)
             {
-                Stair escalera = hit.GetComponent<Stair>();
-                if (escalera != null)
+                Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.5f);
+                foreach (var hit in hitColliders)
                 {
-                    escalera.EjecutarTeletransporteSombra();
-                    break;
+                    escalera = hit.GetComponentInParent<Stair>();
+                    if (escalera == null) escalera = hit.GetComponentInChildren<Stair>();
+                    if (escalera != null) break;
                 }
             }
 
+            if (escalera == null)
+            {
+                FinalizarTurno();
+                return;
+            }
+
+            escalera.EjecutarTeletransporteSombra();
             FinalizarTurno(); // Similar a liberar pasos del jugador
         }
         else
@@ -133,8 +151,7 @@ public partial class SombraAcosadora : MonoBehaviour
     void DespertarSombra()
     {
         activa = true;
-        var renderer = GetComponent<Renderer>();
-        if (renderer != null) renderer.enabled = true;
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
         GetComponent<Collider>().enabled = true;
 
         rb.isKinematic = false;
@@ -146,3 +163,6 @@ public partial class SombraAcosadora : MonoBehaviour
         teleportsSinTurno = 0;
     }
 }
+
+
+

@@ -9,18 +9,18 @@ public class Stair : MonoBehaviour
     // Configuracion visual
     [Range(0f, 1f)]
     public float transparentAlpha = 0.4f; // Transparencia que se aplica al jugador cuando está en la escalera
+    public bool usarTransparencia = false;
 
     // Estado interno
-    private MeshRenderer mr;           // MeshRenderer del objeto escalera
-    private Material mat;              // Material para cambiar transparencia
+    private SpriteRenderer spriteRenderer; // SpriteRenderer del objeto escalera
     private PlayerMovement playerScript; // Referencia al script del jugador cuando entra en la escalera
     private SombraAcosadora sombraScript;         // Referencia al script de la sombra cuando entra en la escalera
 
     // Ciclo de vida Unity
     void Start()
     {
-        mr = GetComponent<MeshRenderer>(); // Obtenemos el MeshRenderer
-        mat = mr.material;                 // Guardamos el material para manipular transparencia
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     // Input de escalera (solo jugador)
@@ -88,6 +88,7 @@ public class Stair : MonoBehaviour
         if (other.CompareTag("Sombra"))
         {
             sombraScript = other.GetComponent<SombraAcosadora>();
+            if (sombraScript != null) sombraScript.SetStair(this);
         }
     }
 
@@ -103,6 +104,7 @@ public class Stair : MonoBehaviour
 
         if (other.CompareTag("Sombra"))
         {
+            if (sombraScript != null) sombraScript.SetStair(null);
             sombraScript = null; // Quitamos referencia a la sombra
         }
     }
@@ -111,10 +113,12 @@ public class Stair : MonoBehaviour
     // Helpers visuales
     void SetTransparency(float alpha)
     {
-        Color c = mat.color;
+        if (!usarTransparencia || spriteRenderer == null) return;
+        Color c = spriteRenderer.color;
         c.a = alpha;
-        mat.color = c;
+        spriteRenderer.color = c;
     }
 }
+
 
 
