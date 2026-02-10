@@ -28,7 +28,8 @@ public partial class SombraAcosadora : MonoBehaviour
         rb = GetComponent<Rigidbody>();
 
         // Estado inicial: invisible e intangible
-        GetComponent<MeshRenderer>().enabled = false;
+        var renderer = GetComponent<Renderer>();
+        if (renderer != null) renderer.enabled = false;
         GetComponent<Collider>().enabled = false;
         rb.isKinematic = true;
     }
@@ -132,7 +133,8 @@ public partial class SombraAcosadora : MonoBehaviour
     void DespertarSombra()
     {
         activa = true;
-        GetComponent<MeshRenderer>().enabled = true;
+        var renderer = GetComponent<Renderer>();
+        if (renderer != null) renderer.enabled = true;
         GetComponent<Collider>().enabled = true;
 
         rb.isKinematic = false;

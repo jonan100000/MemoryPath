@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\TurnCoordinator.cs" />
+     <Compile Include="Assets\Scripts\DeathAnimation.cs" />
      <Compile Include="Assets\Scripts\TeleportUtils.cs" />
      <Compile Include="Assets\Scripts\SombraAcosadora.cs" />
      <Compile Include="Assets\Scripts\SombraAcosadora.Helpers.cs" />
@@ -66,9 +67,14 @@
      <Folder Include="Assets\Scenes" />
      <Folder Include="Assets\Prefabs" />
      <Folder Include="Assets\Settings" />
+     <Folder Include="Assets\Art\Sprites\Enviroment\Flame" />
      <Folder Include="Assets\Settings\Scenes" />
+     <Folder Include="Assets\Art\Sprites" />
+     <Folder Include="Assets\Art" />
      <Folder Include="Assets\Objects" />
-     <Folder Include="Assets\Music" />
+     <Folder Include="Assets\Art\Music" />
+     <Folder Include="Assets\Art\Bacjground" />
+     <Folder Include="Assets\Art\Sprites\Enviroment" />
      <Folder Include="Assets\Scripts" />
      <Reference Include="UnityEngine">
      <HintPath>D:\Unity\Hub\Editor\2022.3.10f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

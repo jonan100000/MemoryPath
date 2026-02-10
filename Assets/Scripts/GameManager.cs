@@ -7,10 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Configuracion de Muerte")]
-    // Configuracion
-    public float retrasoReiniciar = 1.5f;
-    public GameObject efectoMuertePrefab; // Opcional: para particulas
-    public float alturaEfectoMuerte = 1f;
+    public float retrasoReiniciar = 4f;
     public AudioClip sonidoMuerte;
     public AudioSource audioSource;
 
@@ -30,13 +27,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log(entidad.name + " ha muerto.");
 
-        // 1. Efectos visuales comunes
-        if (efectoMuertePrefab != null)
-        {
-            Vector3 pos = entidad.transform.position + Vector3.up * alturaEfectoMuerte;
-            Instantiate(efectoMuertePrefab, pos, Quaternion.identity);
-        }
-
+        // 1. Efecto de sonido comun
         if (sonidoMuerte != null)
         {
             Vector3 pos = entidad.transform.position;
@@ -58,8 +49,15 @@ public class GameManager : MonoBehaviour
     // Logica de muerte por tipo
     private void ProcesarMuerteJugador(GameObject player)
     {
-        // Desactivamos el movimiento para que no siga recibiendo input
-        player.SetActive(false);
+        var deathAnim = player.GetComponent<DeathAnimation>();
+        if (deathAnim != null)
+        {
+            deathAnim.PlayDeath();
+        }
+        else
+        {
+            player.SetActive(false);
+        }
 
         // Reiniciamos el nivel tras un tiempo
         Invoke("ReiniciarNivel", retrasoReiniciar);
@@ -67,8 +65,15 @@ public class GameManager : MonoBehaviour
 
     private void ProcesarMuerteSombra(GameObject sombra)
     {
-        // La sombra simplemente desaparece
-        sombra.SetActive(false);
+        var deathAnim = sombra.GetComponent<DeathAnimation>();
+        if (deathAnim != null)
+        {
+            deathAnim.PlayDeath();
+        }
+        else
+        {
+            sombra.SetActive(false);
+        }
         // Aqui podrias anadir logica extra: da puntos? suelta un objeto?
     }
 
