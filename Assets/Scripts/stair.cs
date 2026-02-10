@@ -13,7 +13,7 @@ public class Stair : MonoBehaviour
     // Estado interno
     private MeshRenderer mr;           // MeshRenderer del objeto escalera
     private Material mat;              // Material para cambiar transparencia
-    private MovimientoPorBloques25D playerScript; // Referencia al script del jugador cuando entra en la escalera
+    private PlayerMovement playerScript; // Referencia al script del jugador cuando entra en la escalera
     private SombraAcosadora sombraScript;         // Referencia al script de la sombra cuando entra en la escalera
 
     // Ciclo de vida Unity
@@ -79,7 +79,7 @@ public class Stair : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            playerScript = other.GetComponent<MovimientoPorBloques25D>();
+            playerScript = other.GetComponent<PlayerMovement>();
             if (playerScript != null) playerScript.enEscalera = true; // Flag que indica que está en escalera
             SetTransparency(transparentAlpha); // Hacemos la escalera transparente para el jugador
         }

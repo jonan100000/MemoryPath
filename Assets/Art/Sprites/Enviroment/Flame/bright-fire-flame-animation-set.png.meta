@@ -1,0 +1,381 @@
+fileFormatVersion: 2
+guid: bd6af4b07ad5c8847b6d5a5e9023d184
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_18
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 837
+        width: 125
+        height: 274
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4306d008e5a011f4daf0e9a1eb8caa2c
+      internalID: -1795708243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_25
+      rect:
+        serializedVersion: 2
+        x: 941
+        y: 835
+        width: 126
+        height: 249
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54fbdea216a3c3b488cc95a800fee30e
+      internalID: -1944020408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_27
+      rect:
+        serializedVersion: 2
+        x: 1308
+        y: 834
+        width: 121
+        height: 266
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3c8982639231d64a83fc73c35fe0e68
+      internalID: -1860269162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_32
+      rect:
+        serializedVersion: 2
+        x: 1305
+        y: 453
+        width: 127
+        height: 297
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 889dddf9a7123ed41b03662427723425
+      internalID: 635880685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_35
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 453
+        width: 138
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c8f04db7bf31844297e07f27c52189c
+      internalID: 672227402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_37
+      rect:
+        serializedVersion: 2
+        x: 943
+        y: 453
+        width: 121
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f33c2ef9b8e63f46a6e32f4089f8738
+      internalID: 1247178255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_41
+      rect:
+        serializedVersion: 2
+        x: 582
+        y: 72
+        width: 127
+        height: 263
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc80995edfc1c2e4381ca7f64de22fe7
+      internalID: 180745589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_43
+      rect:
+        serializedVersion: 2
+        x: 943
+        y: 73
+        width: 121
+        height: 258
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e134275b191a24744a527dc0f3eabfe3
+      internalID: -23871620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bright-fire-flame-animation-set_45
+      rect:
+        serializedVersion: 2
+        x: 1308
+        y: 75
+        width: 126
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27a4be082cb41de4ea450d7417091516
+      internalID: -12843905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      bright-fire-flame-animation-set_0: 323793802
+      bright-fire-flame-animation-set_1: -69093241
+      bright-fire-flame-animation-set_10: 1428897427
+      bright-fire-flame-animation-set_11: -1419675551
+      bright-fire-flame-animation-set_12: 985756268
+      bright-fire-flame-animation-set_13: 237635641
+      bright-fire-flame-animation-set_14: 4293554
+      bright-fire-flame-animation-set_15: 1535358271
+      bright-fire-flame-animation-set_16: 484821996
+      bright-fire-flame-animation-set_17: -628345565
+      bright-fire-flame-animation-set_18: -1795708243
+      bright-fire-flame-animation-set_19: 1571373277
+      bright-fire-flame-animation-set_2: -935791175
+      bright-fire-flame-animation-set_20: -1476770981
+      bright-fire-flame-animation-set_21: 1745837759
+      bright-fire-flame-animation-set_22: 538770617
+      bright-fire-flame-animation-set_23: 157872646
+      bright-fire-flame-animation-set_24: -698926677
+      bright-fire-flame-animation-set_25: -1944020408
+      bright-fire-flame-animation-set_26: -738093177
+      bright-fire-flame-animation-set_27: -1860269162
+      bright-fire-flame-animation-set_28: 1697324053
+      bright-fire-flame-animation-set_29: 1433405244
+      bright-fire-flame-animation-set_3: -1073933012
+      bright-fire-flame-animation-set_30: 485637726
+      bright-fire-flame-animation-set_31: 1004714644
+      bright-fire-flame-animation-set_32: 635880685
+      bright-fire-flame-animation-set_33: -1709691356
+      bright-fire-flame-animation-set_34: -474001079
+      bright-fire-flame-animation-set_35: 672227402
+      bright-fire-flame-animation-set_36: -1027189045
+      bright-fire-flame-animation-set_37: 1247178255
+      bright-fire-flame-animation-set_38: 1347337457
+      bright-fire-flame-animation-set_39: 472088300
+      bright-fire-flame-animation-set_4: -1592702032
+      bright-fire-flame-animation-set_40: -1639437400
+      bright-fire-flame-animation-set_41: 180745589
+      bright-fire-flame-animation-set_42: -418902422
+      bright-fire-flame-animation-set_43: -23871620
+      bright-fire-flame-animation-set_44: -1756153583
+      bright-fire-flame-animation-set_45: -12843905
+      bright-fire-flame-animation-set_46: 1482869361
+      bright-fire-flame-animation-set_47: 252052278
+      bright-fire-flame-animation-set_48: 1633608049
+      bright-fire-flame-animation-set_49: -757892691
+      bright-fire-flame-animation-set_5: 1722997292
+      bright-fire-flame-animation-set_50: -1546407166
+      bright-fire-flame-animation-set_51: -470063735
+      bright-fire-flame-animation-set_6: -1347281774
+      bright-fire-flame-animation-set_7: 1016520144
+      bright-fire-flame-animation-set_8: -637584174
+      bright-fire-flame-animation-set_9: -1214255050
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

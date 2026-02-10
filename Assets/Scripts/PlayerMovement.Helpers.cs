@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public partial class MovimientoPorBloques25D : MonoBehaviour
+public partial class PlayerMovement : MonoBehaviour
 {
     // Helpers de suelo y fisicas
     // Comprueba si el jugador está sobre el suelo mediante raycast

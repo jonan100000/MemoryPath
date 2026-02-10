@@ -29,6 +29,13 @@ public class BridgeController : MonoBehaviour
         ActualizarVisual(); // Actualizamos visual y collider
     }
 
+    // API publica: fuerza el estado
+    public void SetActivo(bool nuevoEstado)
+    {
+        activo = nuevoEstado;
+        ActualizarVisual();
+    }
+
     // Actualiza la visual y el collider del puente según su estado
     // Helpers de estado/visual
     public void ActualizarVisual()

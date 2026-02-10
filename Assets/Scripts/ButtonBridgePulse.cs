@@ -1,50 +1,101 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ButtonBridgePulse : MonoBehaviour
 {
     // Referencias
-    public BridgeController puente; // Referencia al puente que este botón controla
+    public BridgeController puente; // Referencia unica (compatibilidad)
+    public BridgeController[] puentes; // Puentes que este boton controla
 
     // Referencias visuales
     [Header("Referencias Visuales (Hijos)")]
-    public GameObject visualActivado;   // Visual cuando el botón está presionado
-    public GameObject visualDesactivado; // Visual cuando el botón no está presionado
+    public GameObject visualActivado;   // Visual cuando el boton esta presionado
+    public GameObject visualDesactivado; // Visual cuando el boton no esta presionado
 
-    void Start() => SetVisual(false); // Inicializamos el botón en estado “no presionado”
+    private int presiones = 0;
+    private readonly Dictionary<BridgeController, bool> estadosOriginales =
+        new Dictionary<BridgeController, bool>();
+
+    void Start() => SetVisual(false); // Inicializamos el boton en estado "no presionado"
 
     // Triggers
     private void OnTriggerEnter(Collider other)
     {
-        // Verificamos si el collider pertenece al jugador o a la sombra
-        if (EsEntidadValida(other))
+        if (!EsEntidadValida(other)) return;
+
+        presiones++;
+        if (presiones == 1)
         {
-            SetVisual(true); // Activamos la visual de botón presionado
-            
-            if (puente != null)
-            {
-                puente.AlternarPuente(); // Cambiamos el estado del puente (sube/baja)
-            }
+            CapturarEstados();
+            AlternarPuentes();
+            SetVisual(true);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // Cuando la entidad sale, desactivamos la visual
-        if (EsEntidadValida(other))
+        if (!EsEntidadValida(other)) return;
+
+        presiones = Mathf.Max(0, presiones - 1);
+        if (presiones == 0)
         {
+            RestaurarEstados();
             SetVisual(false);
         }
     }
 
-    // Método de ayuda para detectar si la entidad es válida (Jugador o Sombra)
+    // Metodo de ayuda para detectar si la entidad es valida (Jugador o Sombra)
     // Helpers de validacion
     private bool EsEntidadValida(Collider col)
     {
-        return col.GetComponent<MovimientoPorBloques25D>() != null || 
+        return col.GetComponent<PlayerMovement>() != null ||
                col.GetComponent<SombraAcosadora>() != null;
     }
 
-    // Cambia la visual del botón según esté presionado o no
+    private void CapturarEstados()
+    {
+        estadosOriginales.Clear();
+        foreach (var bridge in EnumerarPuentes())
+        {
+            if (bridge == null || estadosOriginales.ContainsKey(bridge)) continue;
+            estadosOriginales[bridge] = bridge.activo;
+        }
+    }
+
+    private void AlternarPuentes()
+    {
+        foreach (var kvp in estadosOriginales)
+        {
+            if (kvp.Key != null)
+            {
+                kvp.Key.SetActivo(!kvp.Value);
+            }
+        }
+    }
+
+    private void RestaurarEstados()
+    {
+        foreach (var kvp in estadosOriginales)
+        {
+            if (kvp.Key != null)
+            {
+                kvp.Key.SetActivo(kvp.Value);
+            }
+        }
+    }
+
+    private IEnumerable<BridgeController> EnumerarPuentes()
+    {
+        if (puentes != null && puentes.Length > 0)
+        {
+            foreach (var bridge in puentes) yield return bridge;
+            yield break;
+        }
+
+        if (puente != null) yield return puente;
+    }
+
+    // Cambia la visual del boton segun este presionado o no
     // Helpers visuales
     private void SetVisual(bool presionado)
     {

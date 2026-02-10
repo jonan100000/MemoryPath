@@ -1,26 +1,60 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public sealed class ControladorMeta : MonoBehaviour
 {
     // Referencias UI
     public GameObject panelVictoria; // Panel que se activa cuando el jugador alcanza la meta
+    public GameObject animVictoria; // Animacion que aparece antes del menu
+    public float retrasoVictoria = 3.5f;
+    public AudioClip sonidoMeta;
+    public AudioSource audioSource;
+
+    private bool metaActivada = false;
+
+    void Start()
+    {
+        if (animVictoria != null) animVictoria.SetActive(false);
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
+    }
 
     // Triggers
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (metaActivada) return;
+        if (!other.CompareTag("Player")) return;
+
+        metaActivada = true;
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        var movimiento = other.GetComponent<PlayerMovement>();
+        if (movimiento != null) movimiento.enabled = false;
+
+        StartCoroutine(MostrarVictoria());
+    }
+
+    private IEnumerator MostrarVictoria()
+    {
+        if (sonidoMeta != null)
         {
-            // Mostrar el panel de victoria
-            panelVictoria.SetActive(true);
-
-            // CONGELAR EL JUEGO
-            Time.timeScale = 0f;
-
-            // Liberar el cursor para poder interactuar con la UI
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            if (audioSource != null) audioSource.PlayOneShot(sonidoMeta);
+            else AudioSource.PlayClipAtPoint(sonidoMeta, transform.position);
         }
+
+        if (animVictoria != null) animVictoria.SetActive(true);
+
+        yield return new WaitForSeconds(retrasoVictoria);
+
+        if (panelVictoria != null) panelVictoria.SetActive(true);
+
+        // Congelar el juego
+        Time.timeScale = 0f;
+
+        // Liberar el cursor para poder interactuar con la UI
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     // UI: volver al menu principal
@@ -46,7 +80,7 @@ public sealed class ControladorMeta : MonoBehaviour
         }
         else
         {
-            // Si es el último nivel, vuelve al menú principal
+            // Si es el ultimo nivel, vuelve al menu principal
             SceneManager.LoadScene("MenuPrincipal");
         }
     }

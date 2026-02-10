@@ -19,6 +19,8 @@ public class MuerteColision : MonoBehaviour
     // Logica comun de muerte
     private void ManejarMuerte(GameObject objetoQueToca)
     {
+        if (!EsEntidadMortal(objetoQueToca)) return;
+
         GameManager gm = GameManager.Instance;
         if (gm == null)
         {
@@ -27,5 +29,10 @@ public class MuerteColision : MonoBehaviour
         }
 
         gm.EntidadMuere(objetoQueToca);
+    }
+
+    private bool EsEntidadMortal(GameObject objeto)
+    {
+        return objeto.CompareTag("Player") || objeto.CompareTag("Sombra");
     }
 }

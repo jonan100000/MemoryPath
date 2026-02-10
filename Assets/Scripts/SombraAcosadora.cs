@@ -3,7 +3,7 @@ using UnityEngine;
 public partial class SombraAcosadora : MonoBehaviour
 {
     // Referencias y configuracion
-    public MovimientoPorBloques25D scriptJugador; // Referencia al script del jugador para leer movimientos
+    public PlayerMovement scriptJugador; // Referencia al script del jugador para leer movimientos
     public int movimientosParaActivar = 5;       // Número de pasos que el jugador debe realizar para despertar a la sombra
     public float velocidadSombra = 5f;           // Velocidad a la que se mueve la sombra
 
@@ -76,9 +76,9 @@ public partial class SombraAcosadora : MonoBehaviour
             return;
 
         // Leemos el comando grabado del historial del jugador
-        MovimientoPorBloques25D.TipoMovimiento comando = scriptJugador.historialComandos[indicePasosSombra];
+        PlayerMovement.TipoMovimiento comando = scriptJugador.historialComandos[indicePasosSombra];
 
-        if (comando == MovimientoPorBloques25D.TipoMovimiento.Escalera)
+        if (comando == PlayerMovement.TipoMovimiento.Escalera)
         {
             // Buscamos triggers de escalera cercanos para ejecutar teletransporte
             Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.5f);
@@ -99,7 +99,7 @@ public partial class SombraAcosadora : MonoBehaviour
             // Movimiento horizontal por bloques
             if (!ejecutandoAccion)
             {
-                float direccion = (comando == MovimientoPorBloques25D.TipoMovimiento.Derecha) ? 1f : -1f;
+                float direccion = (comando == PlayerMovement.TipoMovimiento.Derecha) ? 1f : -1f;
                 xObjetivoPropio = rb.position.x + (direccion * scriptJugador.tamañoBloque);
                 ejecutandoAccion = true;
             }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public partial class MovimientoPorBloques25D : MonoBehaviour
+public partial class PlayerMovement : MonoBehaviour
 {
     // Tipos y configuracion
     // Tipos de movimientos que el jugador puede realizar
