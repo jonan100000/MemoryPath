@@ -122,7 +122,7 @@ public partial class SombraAcosadora : MonoBehaviour
             {
                 float direccion = (comando == PlayerMovement.TipoMovimiento.Derecha) ? 1f : -1f;
                 SetFacing(comando == PlayerMovement.TipoMovimiento.Derecha ? FacingRightY : FacingLeftY);
-                xObjetivoPropio = rb.position.x + (direccion * scriptJugador.tamañoBloque);
+                xObjetivoPropio = rb.position.x + (direccion * scriptJugador.tamanoBloque);
                 ejecutandoAccion = true;
             }
 

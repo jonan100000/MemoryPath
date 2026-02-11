@@ -28,6 +28,7 @@ public class Stair : MonoBehaviour
     {
         // Solo el PLAYER usa input directo para subir/bajar
         if (playerScript == null) return;
+        if (!playerScript.PuedeRecibirInput()) return;
 
         // Calculamos distancia desde la base y desde la cima
         float distBottom = Mathf.Abs(playerScript.transform.position.y - bottomPoint.position.y);

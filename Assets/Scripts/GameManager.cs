@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour
     public float retrasoReiniciar = 4f;
     public AudioClip sonidoMuerte;
     public AudioSource audioSource;
+    private PlayerMovement jugador;
+    private SombraAcosadora sombra;
+    private bool muertePorSolapamientoProcesada = false;
+    private bool colisionesIgnoradas = false;
 
     // Ciclo de vida Unity
     void Awake()
@@ -18,6 +22,27 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
 
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        if (muertePorSolapamientoProcesada) return;
+
+        CachearEntidades();
+        if (jugador == null || sombra == null) return;
+        if (!sombra.EstaActiva()) return;
+
+        IgnorarColisionEntreJugadorYSombra();
+
+        if (!jugador.PuedeRecibirInput()) return;
+        if (sombra.EstaOcupada()) return;
+
+        if (EstanSolapados(jugador, sombra))
+        {
+            muertePorSolapamientoProcesada = true;
+            EntidadMuere(jugador.gameObject);
+            EntidadMuere(sombra.gameObject);
+        }
     }
 
     // API publica: punto unico de muerte
@@ -81,5 +106,36 @@ public class GameManager : MonoBehaviour
     public void ReiniciarNivel()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void CachearEntidades()
+    {
+        if (jugador == null) jugador = FindObjectOfType<PlayerMovement>();
+        if (sombra == null) sombra = FindObjectOfType<SombraAcosadora>();
+    }
+
+    private void IgnorarColisionEntreJugadorYSombra()
+    {
+        if (colisionesIgnoradas) return;
+
+        Collider colPlayer = jugador != null ? jugador.GetComponent<Collider>() : null;
+        Collider colShadow = sombra != null ? sombra.GetComponent<Collider>() : null;
+        if (colPlayer == null || colShadow == null) return;
+
+        Physics.IgnoreCollision(colPlayer, colShadow, true);
+        colisionesIgnoradas = true;
+    }
+
+    private bool EstanSolapados(PlayerMovement player, SombraAcosadora shadow)
+    {
+        Collider colPlayer = player.GetComponent<Collider>();
+        Collider colShadow = shadow.GetComponent<Collider>();
+        if (colPlayer != null && colShadow != null)
+        {
+            return colPlayer.bounds.Intersects(colShadow.bounds);
+        }
+
+        float distancia = Vector3.Distance(player.transform.position, shadow.transform.position);
+        return distancia < 0.1f;
     }
 }

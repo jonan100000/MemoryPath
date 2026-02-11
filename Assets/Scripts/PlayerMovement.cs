@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public partial class PlayerMovement : MonoBehaviour
@@ -7,10 +7,10 @@ public partial class PlayerMovement : MonoBehaviour
     // Tipos de movimientos que el jugador puede realizar
     public enum TipoMovimiento { Izquierda, Derecha, Escalera }
 
-    public float tamañoBloque = 1f; // Distancia que cubre un paso
+    public float tamanoBloque = 1f; // Distancia que cubre un paso
     // Configuracion de movimiento
     public float velocidad = 10f;   // Velocidad de movimiento horizontal
-    public float distanciaSuelo = 0.2f; // Distancia para detectar si el jugador está sobre el suelo
+    public float distanciaSuelo = 0.2f; // Distancia para detectar si el jugador estÃ¡ sobre el suelo
     public LayerMask capaSuelo;     // Capa para raycast de suelo
 
     // Referencias
@@ -23,65 +23,70 @@ public partial class PlayerMovement : MonoBehaviour
 
     // Estado interno
     private Rigidbody rb;          // Rigidbody del jugador
-    private float xObjetivo;       // Posición X a la que el jugador se dirige
-    private bool moviendo = false; // Indica si el jugador está en medio de un movimiento
+    private float xObjetivo;       // PosiciÃ³n X a la que el jugador se dirige
+    private bool moviendo = false; // Indica si el jugador estÃ¡ en medio de un movimiento
+    private bool pasoPendiente = false; // Paso pendiente de completar por input
     private bool estaEnSuelo;      // Para comprobar si puede moverse
     private int teleportsSinTurno = 0; // Conteo de teletransportes sin terminar turno
     private const int maxTeleportsSinTurno = 10;
     private const float FacingRightY = 0f;
     private const float FacingLeftY = 180f;
 
-    [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador está en escalera
+    [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador estÃ¡ en escalera
     [HideInInspector] public bool enTeletransporte = false; // Flag para teletransporte
 
     // Ciclo de vida Unity
     void Start()
     {
         rb = GetComponent<Rigidbody>(); // Obtenemos el Rigidbody
-        xObjetivo = rb.position.x;      // Inicializamos el objetivo X con la posición actual
-        CongelarY();                    // Congelamos la posición Y y rotaciones innecesarias
+        xObjetivo = rb.position.x;      // Inicializamos el objetivo X con la posiciÃ³n actual
+        CongelarY();                    // Congelamos la posiciÃ³n Y y rotaciones innecesarias
     }
 
     // Input y logica por frame
     void Update()
     {
-        ComprobarSuelo(); // Chequeamos si el jugador está sobre el suelo
+        ComprobarSuelo(); // Chequeamos si el jugador estÃ¡ sobre el suelo
 
-        // Control físico vertical
+        // Control fÃ­sico vertical
         if (estaEnSuelo && !enEscalera && !enTeletransporte)
-            CongelarY(); // Congelamos Y si está en suelo y no está en escalera ni teletransporte
+            CongelarY(); // Congelamos Y si estÃ¡ en suelo y no estÃ¡ en escalera ni teletransporte
         else
             LiberarY();  // Permitimos movimiento vertical en el aire, escalera o teletransporte
 
         // BLOQUEO DE INPUT UNIFICADO:
-        // Bloqueamos input si el jugador no está en suelo, si ya está moviéndose, o si la sombra está ocupada
+        // Bloqueamos input si el jugador no estÃ¡ en suelo, si ya estÃ¡ moviÃ©ndose, o si la sombra estÃ¡ ocupada
         if (!PuedeRecibirInput())
-            return; // Salimos del Update si alguna condición de bloqueo se cumple
+            return; // Salimos del Update si alguna condiciÃ³n de bloqueo se cumple
 
         // LECTURA DE INPUTS
         if (Input.GetKeyDown(KeyCode.A)) // Mover a la izquierda
         {
-            xObjetivo -= tamañoBloque;           // Calculamos la nueva posición X
+            xObjetivo -= tamanoBloque;           // Calculamos la nueva posiciÃ³n X
             moviendo = true;                      // Indicamos que estamos en movimiento
             historialComandos.Add(TipoMovimiento.Izquierda); // Registramos el movimiento para la sombra
+            pasoPendiente = true;
+            CompletarPaso();
             SetFacing(FacingLeftY);
         }
         else if (Input.GetKeyDown(KeyCode.D)) // Mover a la derecha
         {
-            xObjetivo += tamañoBloque;
+            xObjetivo += tamanoBloque;
             moviendo = true;
             historialComandos.Add(TipoMovimiento.Derecha);
+            pasoPendiente = true;
+            CompletarPaso();
             SetFacing(FacingRightY);
         }
-        // Observación: No se gestionan diagonales ni inputs simultáneos, simplificando movimiento por bloques
+        // ObservaciÃ³n: No se gestionan diagonales ni inputs simultÃ¡neos, simplificando movimiento por bloques
     }
 
     // Fisica de movimiento por bloques
     void FixedUpdate()
     {
-        if (!moviendo) return; // Solo calculamos física si estamos moviéndonos
+        if (!moviendo) return; // Solo calculamos fÃ­sica si estamos moviÃ©ndonos
 
-        // Movemos suavemente hacia la posición objetivo usando MoveTowards
+        // Movemos suavemente hacia la posiciÃ³n objetivo usando MoveTowards
         float nuevaX = Mathf.MoveTowards(rb.position.x, xObjetivo, velocidad * Time.fixedDeltaTime);
         rb.MovePosition(new Vector3(nuevaX, rb.position.y, rb.position.z));
 
@@ -90,11 +95,7 @@ public partial class PlayerMovement : MonoBehaviour
         {
             rb.MovePosition(new Vector3(xObjetivo, rb.position.y, rb.position.z));
             moviendo = false;          // Terminamos el movimiento
-            movimientosRealizados++;   // Incrementamos contador de pasos
-            teleportsSinTurno = 0; // Termina el turno del jugador
-
-            // Sincronizamos paso con la sombra (similar a SombraAcosadora.SincronizarPaso)
-            TurnCoordinator.RegistrarPasoJugador(scriptSombra);
+            CompletarPaso();
         }
     }
     private void SetFacing(float yRotation)
@@ -106,3 +107,5 @@ public partial class PlayerMovement : MonoBehaviour
         transform.localEulerAngles = new Vector3(euler.x, yRotation, euler.z);
     }
 }
+
+

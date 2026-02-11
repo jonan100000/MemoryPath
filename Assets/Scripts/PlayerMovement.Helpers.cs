@@ -1,9 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class PlayerMovement : MonoBehaviour
 {
     // Helpers de suelo y fisicas
-    // Comprueba si el jugador está sobre el suelo mediante raycast
+    // Comprueba si el jugador estÃ¡ sobre el suelo mediante raycast
     void ComprobarSuelo()
     {
         estaEnSuelo = Physics.Raycast(transform.position, Vector3.down, distanciaSuelo, capaSuelo);
@@ -17,7 +17,7 @@ public partial class PlayerMovement : MonoBehaviour
                        | RigidbodyConstraints.FreezeRotationZ;
     }
 
-    // Libera la posición Y para permitir saltos o teletransportes
+    // Libera la posiciÃ³n Y para permitir saltos o teletransportes
     void LiberarY()
     {
         rb.constraints = RigidbodyConstraints.FreezeRotationX 
@@ -25,12 +25,12 @@ public partial class PlayerMovement : MonoBehaviour
     }
 
     // Helpers de turno/input
-    private bool PuedeRecibirInput()
+    public bool PuedeRecibirInput()
     {
         return TurnCoordinator.JugadorPuedeRecibirInput(estaEnSuelo, moviendo, scriptSombra);
     }
 
-    // Método para teletransportar al jugador (por ejemplo, portal)
+    // MÃ©todo para teletransportar al jugador (por ejemplo, portal)
     // Teleport principal del jugador
     public void Teletransportar(Vector3 destino)
     {
@@ -45,6 +45,21 @@ public partial class PlayerMovement : MonoBehaviour
         {
             MatarPorExcesoTeleports();
         }
+
+        if (pasoPendiente)
+        {
+            CompletarPaso();
+        }
+    }
+
+    // Helpers de turno
+    private void CompletarPaso()
+    {
+        if (!pasoPendiente) return;
+        movimientosRealizados++;
+        teleportsSinTurno = 0;
+        pasoPendiente = false;
+        TurnCoordinator.RegistrarPasoJugador(scriptSombra);
     }
 
     // Registrar paso de escalera
@@ -54,6 +69,7 @@ public partial class PlayerMovement : MonoBehaviour
         movimientosRealizados++;                        // Incrementamos contador de movimientos
         historialComandos.Add(TipoMovimiento.Escalera); // Registramos en historial
         teleportsSinTurno = 0;                           // Termina el turno del jugador
+        pasoPendiente = false;
         TurnCoordinator.RegistrarPasoJugador(scriptSombra);            // Sincronizamos paso con la sombra
     }
 
@@ -71,3 +87,5 @@ public partial class PlayerMovement : MonoBehaviour
         }
     }
 }
+
+
