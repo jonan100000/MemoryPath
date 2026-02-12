@@ -2,6 +2,20 @@ using UnityEngine;
 
 public partial class SombraAcosadora : MonoBehaviour
 {
+    // Deja la sombra en estado no bloqueante antes de deshabilitar scripts/objeto.
+    public void PrepararMuerte()
+    {
+        muerta = true;
+        ejecutandoAccion = false;
+        pasosPermitidos = 0;
+        teleportsSinTurno = 0;
+
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero;
+        }
+    }
+
     // API publica: bloqueo del jugador
     public bool BloqueaJugador()
     {
@@ -32,8 +46,7 @@ public partial class SombraAcosadora : MonoBehaviour
     // API publica: muerte directa
     public void Morir()
     {
-        muerta = true;
-        rb.velocity = Vector3.zero;
+        PrepararMuerte();
         gameObject.SetActive(false);
     }
 

@@ -90,6 +90,12 @@ public class GameManager : MonoBehaviour
 
     private void ProcesarMuerteSombra(GameObject sombra)
     {
+        var sombraScript = sombra.GetComponent<SombraAcosadora>();
+        if (sombraScript != null)
+        {
+            sombraScript.PrepararMuerte();
+        }
+
         var deathAnim = sombra.GetComponent<DeathAnimation>();
         if (deathAnim != null)
         {
