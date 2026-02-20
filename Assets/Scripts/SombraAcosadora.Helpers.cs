@@ -31,7 +31,10 @@ public partial class SombraAcosadora : MonoBehaviour
     // Teleport de la sombra (opcionalmente consume paso)
     public void Teletransportar(Vector3 destino, bool consumirPaso = false)
     {
+        TurnCoordinator.BloquearPorTeleport(teleportsSinTurno);
+        destino.z = rb.position.z; // La sombra nunca debe desplazarse en Z.
         TeleportUtils.Teleportar(rb, transform, destino, true);
+        ReproducirSonidoTeleport();
         teleportsSinTurno++;
         if (teleportsSinTurno > maxTeleportsSinTurno)
         {
@@ -42,8 +45,7 @@ public partial class SombraAcosadora : MonoBehaviour
         if (consumirPaso) CompletarPasoPorTeleport();
     }
 
-    // Método para colisiones con trampas o muerte directa
-    // API publica: muerte directa
+    // Metodo para colisiones con trampas o muerte directa
     public void Morir()
     {
         PrepararMuerte();
@@ -74,15 +76,21 @@ public partial class SombraAcosadora : MonoBehaviour
     }
 
     // Estado de pasos pendientes
-    public bool TienePasosPendientes() => pasosPermitidos > 0; // Similar a comprobar si el jugador puede moverse
+    public bool TienePasosPendientes() => pasosPermitidos > 0;
 
     // Ocupacion: se usa para bloquear input del jugador
     public bool EstaOcupada()
     {
         if (!activa || muerta || HaTerminadoReproduccion()) return false;
         if (TurnCoordinator.TeleportBloqueaMovimiento()) return true;
-        // Ocupada si está moviéndose o cayendo
         bool cayendo = Mathf.Abs(rb.velocity.y) > 0.1f;
         return ejecutandoAccion || cayendo || TienePasosPendientes();
+    }
+
+    private void ReproducirSonidoTeleport()
+    {
+        if (sonidoTeleport == null) return;
+        if (audioSourceTeleport != null) audioSourceTeleport.PlayOneShot(sonidoTeleport);
+        else AudioSource.PlayClipAtPoint(sonidoTeleport, transform.position);
     }
 }

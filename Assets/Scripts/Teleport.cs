@@ -65,7 +65,6 @@ public class TeleportPortal : MonoBehaviour
         var player = other.GetComponent<PlayerMovement>();
         if (player != null)
         {
-            TurnCoordinator.BloquearPorTeleport();
             player.Teletransportar(destino.position); // Teletransportamos al jugador usando su metodo
             SincronizarConPareja(false);             // Cerramos el portal despues de usarlo
             return; // Salimos para no ejecutar el resto
@@ -75,7 +74,6 @@ public class TeleportPortal : MonoBehaviour
         var sombra = other.GetComponent<SombraAcosadora>();
         if (sombra != null)
         {
-            TurnCoordinator.BloquearPorTeleport();
             // Movimiento fisico inmediato de la sombra
             sombra.Teletransportar(destino.position, true);
 

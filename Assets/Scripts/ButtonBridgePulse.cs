@@ -3,6 +3,15 @@ using System.Collections.Generic;
 
 public class ButtonBridgePulse : MonoBehaviour
 {
+    private sealed class EstadoGlobalPuente
+    {
+        public bool estadoOriginal;
+        public int botonesActivos;
+    }
+
+    private static readonly Dictionary<BridgeController, EstadoGlobalPuente> estadosGlobales =
+        new Dictionary<BridgeController, EstadoGlobalPuente>();
+
     // Referencias
     public BridgeController puente; // Referencia unica (compatibilidad)
     public BridgeController[] puentes; // Puentes que este boton controla
@@ -13,8 +22,6 @@ public class ButtonBridgePulse : MonoBehaviour
     public GameObject visualDesactivado; // Visual cuando el boton no esta presionado
 
     private int presiones = 0;
-    private readonly Dictionary<BridgeController, bool> estadosOriginales =
-        new Dictionary<BridgeController, bool>();
 
     void Start() => SetVisual(false); // Inicializamos el boton en estado "no presionado"
 
@@ -26,8 +33,7 @@ public class ButtonBridgePulse : MonoBehaviour
         presiones++;
         if (presiones == 1)
         {
-            CapturarEstados();
-            AlternarPuentes();
+            ActivarPulsoGlobal();
             SetVisual(true);
         }
     }
@@ -39,7 +45,7 @@ public class ButtonBridgePulse : MonoBehaviour
         presiones = Mathf.Max(0, presiones - 1);
         if (presiones == 0)
         {
-            RestaurarEstados();
+            LiberarPulsoGlobal();
             SetVisual(false);
         }
     }
@@ -52,34 +58,44 @@ public class ButtonBridgePulse : MonoBehaviour
                col.GetComponent<SombraAcosadora>() != null;
     }
 
-    private void CapturarEstados()
+    // Logica global: varios botones sobre el mismo puente no deben alternarlo dos veces.
+    private void ActivarPulsoGlobal()
     {
-        estadosOriginales.Clear();
         foreach (var bridge in EnumerarPuentes())
         {
-            if (bridge == null || estadosOriginales.ContainsKey(bridge)) continue;
-            estadosOriginales[bridge] = bridge.activo;
-        }
-    }
+            if (bridge == null) continue;
 
-    private void AlternarPuentes()
-    {
-        foreach (var kvp in estadosOriginales)
-        {
-            if (kvp.Key != null)
+            if (!estadosGlobales.TryGetValue(bridge, out var estado))
             {
-                kvp.Key.SetActivo(!kvp.Value);
+                estado = new EstadoGlobalPuente
+                {
+                    estadoOriginal = bridge.activo,
+                    botonesActivos = 0
+                };
+                estadosGlobales[bridge] = estado;
             }
+
+            estado.botonesActivos++;
+            bridge.SetActivo(!estado.estadoOriginal);
         }
     }
 
-    private void RestaurarEstados()
+    private void LiberarPulsoGlobal()
     {
-        foreach (var kvp in estadosOriginales)
+        foreach (var bridge in EnumerarPuentes())
         {
-            if (kvp.Key != null)
+            if (bridge == null) continue;
+            if (!estadosGlobales.TryGetValue(bridge, out var estado)) continue;
+
+            estado.botonesActivos = Mathf.Max(0, estado.botonesActivos - 1);
+            if (estado.botonesActivos == 0)
             {
-                kvp.Key.SetActivo(kvp.Value);
+                bridge.SetActivo(estado.estadoOriginal);
+                estadosGlobales.Remove(bridge);
+            }
+            else
+            {
+                bridge.SetActivo(!estado.estadoOriginal);
             }
         }
     }

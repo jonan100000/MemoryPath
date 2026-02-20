@@ -15,6 +15,10 @@ public partial class PlayerMovement : MonoBehaviour
 
     // Referencias
     public SombraAcosadora scriptSombra; // Referencia al script de la sombra acosadora
+    public AudioClip sonidoMovimiento;
+    public AudioSource audioSourceMovimiento;
+    public AudioClip sonidoTeleport;
+    public AudioSource audioSourceTeleport;
 
     // Estado e historial
     public int movimientosRealizados = 0; // Contador de pasos realizados por el jugador
@@ -31,6 +35,13 @@ public partial class PlayerMovement : MonoBehaviour
     private const int maxTeleportsSinTurno = 10;
     private const float FacingRightY = 0f;
     private const float FacingLeftY = 180f;
+    private const float TouchInputBufferSeconds = 0.2f;
+    private float inputTactilIzquierdaHasta = -1f;
+    private float inputTactilDerechaHasta = -1f;
+    private float inputTactilArribaHasta = -1f;
+    private float inputTactilAbajoHasta = -1f;
+    private int ultimoFrameTeleportEscalera = -1;
+    private float bloqueoEscaleraHasta = -1f;
 
     [HideInInspector] public bool enEscalera = false;       // Flag para indicar si el jugador estÃ¡ en escalera
     [HideInInspector] public bool enTeletransporte = false; // Flag para teletransporte
@@ -39,6 +50,8 @@ public partial class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>(); // Obtenemos el Rigidbody
+        if (audioSourceMovimiento == null) audioSourceMovimiento = GetComponent<AudioSource>();
+        if (audioSourceTeleport == null) audioSourceTeleport = audioSourceMovimiento;
         xObjetivo = rb.position.x;      // Inicializamos el objetivo X con la posiciÃ³n actual
         CongelarY();                    // Congelamos la posiciÃ³n Y y rotaciones innecesarias
     }
@@ -60,22 +73,31 @@ public partial class PlayerMovement : MonoBehaviour
             return; // Salimos del Update si alguna condiciÃ³n de bloqueo se cumple
 
         // LECTURA DE INPUTS
-        if (Input.GetKeyDown(KeyCode.A)) // Mover a la izquierda
+        bool moverIzquierda = Input.GetKeyDown(KeyCode.A)
+                           || Input.GetKeyDown(KeyCode.LeftArrow)
+                           || ConsumirInputTactil(ref inputTactilIzquierdaHasta);
+        bool moverDerecha = Input.GetKeyDown(KeyCode.D)
+                         || Input.GetKeyDown(KeyCode.RightArrow)
+                         || ConsumirInputTactil(ref inputTactilDerechaHasta);
+
+        if (moverIzquierda) // Mover a la izquierda
         {
             xObjetivo -= tamanoBloque;           // Calculamos la nueva posiciÃ³n X
             moviendo = true;                      // Indicamos que estamos en movimiento
             historialComandos.Add(TipoMovimiento.Izquierda); // Registramos el movimiento para la sombra
             pasoPendiente = true;
             CompletarPaso();
+            ReproducirSonidoMovimiento();
             SetFacing(FacingLeftY);
         }
-        else if (Input.GetKeyDown(KeyCode.D)) // Mover a la derecha
+        else if (moverDerecha) // Mover a la derecha
         {
             xObjetivo += tamanoBloque;
             moviendo = true;
             historialComandos.Add(TipoMovimiento.Derecha);
             pasoPendiente = true;
             CompletarPaso();
+            ReproducirSonidoMovimiento();
             SetFacing(FacingRightY);
         }
         // ObservaciÃ³n: No se gestionan diagonales ni inputs simultÃ¡neos, simplificando movimiento por bloques
@@ -105,6 +127,56 @@ public partial class PlayerMovement : MonoBehaviour
             return;
 
         transform.localEulerAngles = new Vector3(euler.x, yRotation, euler.z);
+    }
+
+    // API publica: input tactil horizontal
+    public void BotonIzquierda() => RegistrarInputTactil(ref inputTactilIzquierdaHasta);
+    public void BotonDerecha() => RegistrarInputTactil(ref inputTactilDerechaHasta);
+
+    // API publica: input tactil vertical para escaleras
+    public void BotonArriba() => RegistrarInputTactil(ref inputTactilArribaHasta);
+    public void BotonAbajo() => RegistrarInputTactil(ref inputTactilAbajoHasta);
+
+    // API publica: consumos de input vertical
+    public bool ConsumirSubir()
+    {
+        return Input.GetKeyDown(KeyCode.W)
+            || Input.GetKeyDown(KeyCode.UpArrow)
+            || ConsumirInputTactil(ref inputTactilArribaHasta);
+    }
+
+    public bool ConsumirBajar()
+    {
+        return Input.GetKeyDown(KeyCode.S)
+            || Input.GetKeyDown(KeyCode.DownArrow)
+            || ConsumirInputTactil(ref inputTactilAbajoHasta);
+    }
+
+    private void RegistrarInputTactil(ref float inputHasta)
+    {
+        float nuevoVencimiento = Time.unscaledTime + TouchInputBufferSeconds;
+        if (nuevoVencimiento > inputHasta) inputHasta = nuevoVencimiento;
+    }
+
+    private bool ConsumirInputTactil(ref float inputHasta)
+    {
+        if (Time.unscaledTime > inputHasta) return false;
+        inputHasta = -1f;
+        return true;
+    }
+
+    private void ReproducirSonidoMovimiento()
+    {
+        if (sonidoMovimiento == null) return;
+        if (audioSourceMovimiento != null) audioSourceMovimiento.PlayOneShot(sonidoMovimiento);
+        else AudioSource.PlayClipAtPoint(sonidoMovimiento, transform.position);
+    }
+
+    private void ReproducirSonidoTeleport()
+    {
+        if (sonidoTeleport == null) return;
+        if (audioSourceTeleport != null) audioSourceTeleport.PlayOneShot(sonidoTeleport);
+        else AudioSource.PlayClipAtPoint(sonidoTeleport, transform.position);
     }
 }
 

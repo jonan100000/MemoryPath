@@ -111,7 +111,7 @@ public class GameManager : MonoBehaviour
     // Accion final: reinicia la escena
     public void ReiniciarNivel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneLoadService.LoadSceneByIndex(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void CachearEntidades()

@@ -8,13 +8,13 @@ public class Stair : MonoBehaviour
 
     // Configuracion visual
     [Range(0f, 1f)]
-    public float transparentAlpha = 0.4f; // Transparencia que se aplica al jugador cuando está en la escalera
+    public float transparentAlpha = 0.4f; // Transparencia que se aplica al jugador cuando esta en la escalera
     public bool usarTransparencia = false;
 
     // Estado interno
     private SpriteRenderer spriteRenderer; // SpriteRenderer del objeto escalera
-    private PlayerMovement playerScript; // Referencia al script del jugador cuando entra en la escalera
-    private SombraAcosadora sombraScript;         // Referencia al script de la sombra cuando entra en la escalera
+    private PlayerMovement playerScript;   // Referencia al script del jugador cuando entra en la escalera
+    private SombraAcosadora sombraScript;  // Referencia al script de la sombra cuando entra en la escalera
 
     // Ciclo de vida Unity
     void Start()
@@ -29,34 +29,36 @@ public class Stair : MonoBehaviour
         // Solo el PLAYER usa input directo para subir/bajar
         if (playerScript == null) return;
         if (!playerScript.PuedeRecibirInput()) return;
+        if (!playerScript.PuedeUsarEscaleraAhora()) return;
 
         // Calculamos distancia desde la base y desde la cima
         float distBottom = Mathf.Abs(playerScript.transform.position.y - bottomPoint.position.y);
         float distTop = Mathf.Abs(playerScript.transform.position.y - topPoint.position.y);
 
-        // Si el jugador está más cerca de la base, puede subir
+        // Si el jugador esta mas cerca de la base, puede subir
         if (distBottom < distTop)
         {
-            if (Input.GetKeyDown(KeyCode.W))
+            if (playerScript.ConsumirSubir())
             {
                 // Teletransportamos al jugador a la cima
                 playerScript.Teletransportar(topPoint.position);
                 // Registramos este movimiento como un "paso de escalera"
-                playerScript.RegistrarPasoDeEscalera(); 
+                playerScript.RegistrarPasoDeEscalera();
+                playerScript.MarcarUsoEscaleraTrasTeleport();
             }
         }
-        else // Si está más cerca de la cima, puede bajar
+        else // Si esta mas cerca de la cima, puede bajar
         {
-            if (Input.GetKeyDown(KeyCode.S))
+            if (playerScript.ConsumirBajar())
             {
-                TurnCoordinator.BloquearPorTeleport();
                 playerScript.Teletransportar(bottomPoint.position);
                 playerScript.RegistrarPasoDeEscalera();
+                playerScript.MarcarUsoEscaleraTrasTeleport();
             }
         }
     }
 
-    // Método llamado por la sombra para teletransportarse por la escalera
+    // Metodo llamado por la sombra para teletransportarse por la escalera
     // Accion de sombra: teletransporta segun posicion
     public void EjecutarTeletransporteSombra()
     {
@@ -67,10 +69,10 @@ public class Stair : MonoBehaviour
         float distBottom = Vector3.Distance(sombraScript.transform.position, bottomPoint.position);
         float distTop = Vector3.Distance(sombraScript.transform.position, topPoint.position);
 
-        // Elegimos destino: si está abajo, sube; si está arriba, baja
+        // Elegimos destino: si esta abajo, sube; si esta arriba, baja
         Vector3 destino = (distBottom < distTop) ? topPoint.position : bottomPoint.position;
 
-        // Teletransportamos físicamente a la sombra
+        // Teletransportamos fisicamente a la sombra
         sombraScript.Teletransportar(destino, false);
     }
 
@@ -81,7 +83,7 @@ public class Stair : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerScript = other.GetComponent<PlayerMovement>();
-            if (playerScript != null) playerScript.enEscalera = true; // Flag que indica que está en escalera
+            if (playerScript != null) playerScript.enEscalera = true; // Flag que indica que esta en escalera
             SetTransparency(transparentAlpha); // Hacemos la escalera transparente para el jugador
         }
 
@@ -120,6 +122,3 @@ public class Stair : MonoBehaviour
         spriteRenderer.color = c;
     }
 }
-
-
-

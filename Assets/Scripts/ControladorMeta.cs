@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public sealed class ControladorMeta : MonoBehaviour
 {
@@ -101,7 +101,7 @@ public sealed class ControladorMeta : MonoBehaviour
     {
         // IMPORTANTE: Resetear el tiempo antes de cambiar de escena
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MenuPrincipal");
+        SceneLoadService.LoadSceneByName("MenuPrincipal");
     }
 
     // UI: cargar el siguiente nivel o volver al menu
@@ -115,12 +115,12 @@ public sealed class ControladorMeta : MonoBehaviour
         // Si la siguiente escena existe en la lista de Build Settings...
         if (escenaActual + 1 < SceneManager.sceneCountInBuildSettings)
         {
-            SceneManager.LoadScene(escenaActual + 1);
+            SceneLoadService.LoadSceneByIndex(escenaActual + 1);
         }
         else
         {
             // Si es el ultimo nivel, vuelve al menu principal
-            SceneManager.LoadScene("MenuPrincipal");
+            SceneLoadService.LoadSceneByName("MenuPrincipal");
         }
     }
 }
